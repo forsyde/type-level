@@ -92,7 +92,7 @@ dec2TypeLevel n
  | otherwise = let (quotient, reminder) = n `quotRem` 10 
                    remType  = dec2TypeLevel reminder
                    quotType = dec2TypeLevel quotient
-               in (conT ''(:+)) `appT` quotType `appT` remType
+               in (conT ''(:*)) `appT` quotType `appT` remType
 
 
 -- | Generate a decimal type synonym alias

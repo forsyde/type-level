@@ -75,20 +75,20 @@ instance NatI D9 where toInt _ = 9
 
 -- multidigit naturals
 -- Note: The PosI constraint guarantees that all valid representations are 
--- normalized (i.e. D0 :+ D1 will lead to a compiler error)
+-- normalized (i.e. D0 :* D1 will lead to a compiler error)
 -- Note as well that ill-formed representations such as
--- (D1 :+ D2) :+ (D3 :+ D4) are not recognized as instances of
+-- (D1 :* D2) :* (D3 :* D4) are not recognized as instances of
 -- naturals nor positives.
-instance PosI x => NatI (x :+ D0) where toInt n = subLastDec n
-instance PosI x => NatI (x :+ D1) where toInt n = subLastDec n + 1
-instance PosI x => NatI (x :+ D2) where toInt n = subLastDec n + 2
-instance PosI x => NatI (x :+ D3) where toInt n = subLastDec n + 3
-instance PosI x => NatI (x :+ D4) where toInt n = subLastDec n + 4
-instance PosI x => NatI (x :+ D5) where toInt n = subLastDec n + 5
-instance PosI x => NatI (x :+ D6) where toInt n = subLastDec n + 6
-instance PosI x => NatI (x :+ D7) where toInt n = subLastDec n + 7
-instance PosI x => NatI (x :+ D8) where toInt n = subLastDec n + 8
-instance PosI x => NatI (x :+ D9) where toInt n = subLastDec n + 9
+instance PosI x => NatI (x :* D0) where toInt n = subLastDec n
+instance PosI x => NatI (x :* D1) where toInt n = subLastDec n + 1
+instance PosI x => NatI (x :* D2) where toInt n = subLastDec n + 2
+instance PosI x => NatI (x :* D3) where toInt n = subLastDec n + 3
+instance PosI x => NatI (x :* D4) where toInt n = subLastDec n + 4
+instance PosI x => NatI (x :* D5) where toInt n = subLastDec n + 5
+instance PosI x => NatI (x :* D6) where toInt n = subLastDec n + 6
+instance PosI x => NatI (x :* D7) where toInt n = subLastDec n + 7
+instance PosI x => NatI (x :* D8) where toInt n = subLastDec n + 8
+instance PosI x => NatI (x :* D9) where toInt n = subLastDec n + 9
 
 -- monodigit positives
 instance PosI D1
@@ -103,17 +103,17 @@ instance PosI D9
 
 -- multidigit positives
 -- Note: The PosI constraint guarantees that all valid representations are 
--- normalized (i.e. D0 :+ D1 will lead to a compiler error)
-instance PosI x => PosI (x :+ D0)
-instance PosI x => PosI (x :+ D1)
-instance PosI x => PosI (x :+ D2)
-instance PosI x => PosI (x :+ D3)
-instance PosI x => PosI (x :+ D4)
-instance PosI x => PosI (x :+ D5)
-instance PosI x => PosI (x :+ D6)
-instance PosI x => PosI (x :+ D7)
-instance PosI x => PosI (x :+ D8)
-instance PosI x => PosI (x :+ D9)
+-- normalized (i.e. D0 :* D1 will lead to a compiler error)
+instance PosI x => PosI (x :* D0)
+instance PosI x => PosI (x :* D1)
+instance PosI x => PosI (x :* D2)
+instance PosI x => PosI (x :* D3)
+instance PosI x => PosI (x :* D4)
+instance PosI x => PosI (x :* D5)
+instance PosI x => PosI (x :* D6)
+instance PosI x => PosI (x :* D7)
+instance PosI x => PosI (x :* D8)
+instance PosI x => PosI (x :* D9)
 
 
 
@@ -124,10 +124,10 @@ instance PosI x => PosI (x :+ D9)
 -- substract the last digit of a decimal type-level numeral and obtain 
 -- the result's reflected value 
 {-# INLINE subLastDec #-}
-subLastDec :: (NatI x, NatI (x :+ d)) => x :+ d -> Int 
+subLastDec :: (NatI x, NatI (x :* d)) => x :* d -> Int 
 subLastDec = (10*).toInt.div10Dec
 
 -- Divide a decimal type-level numeral by 10 
 {-# INLINE div10Dec #-} 
-div10Dec :: NatI (x :+ d) => x :+ d -> x
+div10Dec :: NatI (x :* d) => x :* d -> x
 div10Dec _ = undefined

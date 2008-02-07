@@ -20,7 +20,7 @@ module Data.TypeLevel.Num.Reps (
  --  ** Digits
  D0, D1, D2, D3, D4, D5, D6, D7, D8, D9,
  --  ** Connective
- (:+),
+ (:*),
  ) where
 
 
@@ -30,9 +30,9 @@ module Data.TypeLevel.Num.Reps (
 
 -- $decdescription 
 -- Decimals are represented using a different type (@Dx@) for each digit and a 
--- binary infix connective (@:+@) to enable forming arbitrary precision 
--- multidigit numbers. For example @D0@ represents number 0, @D4 :+ D2@ 
--- represents number 42, @D1 :+ D0 :+ D0@ represents 100, etc ... Obviously, 
+-- binary infix connective (@:*@) to enable forming arbitrary precision 
+-- multidigit numbers. For example @D0@ represents number 0, @D4 :* D2@ 
+-- represents number 42, @D1 :* D0 :* D0@ represents 100, etc ... Obviously, 
 -- negative numbers cannot be represented.
 
 -- | Decimal digit zero
@@ -57,7 +57,7 @@ data D8
 data D9
 
 -- | Connective to glue digits together.
---   For example, @D1 :+ D0 :+ D0@ represents the decimal number 100
-data a :+ b = a :+ b 
+--   For example, @D1 :* D0 :* D0@ represents the decimal number 100
+data a :* b = a :* b 
 
 

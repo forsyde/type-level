@@ -90,17 +90,17 @@ instance Succ' D5 D6
 instance Succ' D6 D7
 instance Succ' D7 D8
 instance Succ' D8 D9
-instance Succ' D9 (D1 :+ D0)
-instance Pos x => Succ' (x :+ D0) (x :+ D1)
-instance Pos x => Succ' (x :+ D1) (x :+ D2)
-instance Pos x => Succ' (x :+ D2) (x :+ D3)
-instance Pos x => Succ' (x :+ D3) (x :+ D4)
-instance Pos x => Succ' (x :+ D4) (x :+ D5)
-instance Pos x => Succ' (x :+ D5) (x :+ D6)
-instance Pos x => Succ' (x :+ D6) (x :+ D7)
-instance Pos x => Succ' (x :+ D7) (x :+ D8)
-instance Pos x => Succ' (x :+ D8) (x :+ D9)
-instance (Pos x, Succ' x y) => Succ' (x :+ D9) (y  :+ D0)
+instance Succ' D9 (D1 :* D0)
+instance Pos x => Succ' (x :* D0) (x :* D1)
+instance Pos x => Succ' (x :* D1) (x :* D2)
+instance Pos x => Succ' (x :* D2) (x :* D3)
+instance Pos x => Succ' (x :* D3) (x :* D4)
+instance Pos x => Succ' (x :* D4) (x :* D5)
+instance Pos x => Succ' (x :* D5) (x :* D6)
+instance Pos x => Succ' (x :* D6) (x :* D7)
+instance Pos x => Succ' (x :* D7) (x :* D8)
+instance Pos x => Succ' (x :* D8) (x :* D9)
+instance (Pos x, Succ' x y) => Succ' (x :* D9) (y  :* D0)
 
 
 class (Nat x, Pos y) => Succ x y | x -> y, y -> x
@@ -143,26 +143,26 @@ instance (Succ z z', Add' D6 y z) => Add' D7 y z'
 instance (Succ z z', Add' D7 y z) => Add' D8 y z'
 instance (Succ z z', Add' D8 y z) => Add' D9 y z'
 -- multidigit addition
-instance (Pos x, Pos (zi :+ zl), Add' x yi zi, DivMod10 yi yl y)
-    => Add' (x :+ D0) y (zi :+ zl)
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Succ (zi :+ yl) z)
-    => Add' (x :+ D1) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D2 (zi :+ yl) z)
-    => Add' (x :+ D2) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D3 (zi :+ yl) z)
-    => Add' (x :+ D3) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D4 (zi :+ yl) z)
-    => Add' (x :+ D4) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D5 (zi :+ yl) z)
-    => Add' (x :+ D5) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D6 (zi :+ yl) z)
-    => Add' (x :+ D6) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D7 (zi :+ yl) z)
-    => Add' (x :+ D7) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D8 (zi :+ yl) z)
-    => Add' (x :+ D8) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D9 (zi :+ yl) z)
-    => Add' (x :+ D9) y z
+instance (Pos x, Pos (zi :* zl), Add' x yi zi, DivMod10 yi yl y)
+    => Add' (x :* D0) y (zi :* zl)
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Succ (zi :* yl) z)
+    => Add' (x :* D1) y z
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D2 (zi :* yl) z)
+    => Add' (x :* D2) y z
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D3 (zi :* yl) z)
+    => Add' (x :* D3) y z
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D4 (zi :* yl) z)
+    => Add' (x :* D4) y z
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D5 (zi :* yl) z)
+    => Add' (x :* D5) y z
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D6 (zi :* yl) z)
+    => Add' (x :* D6) y z
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D7 (zi :* yl) z)
+    => Add' (x :* D7) y z
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D8 (zi :* yl) z)
+    => Add' (x :* D8) y z
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D9 (zi :* yl) z)
+    => Add' (x :* D9) y z
 
 
 {-
@@ -176,14 +176,14 @@ instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D9 (zi :+ yl) z)
 --  +9345      4567 + 9345 =  ((5 + 7) mod 10) + 
 --   ----                     ( ((5 + 7) div 10) + (456 + 934) ) * 10  
 --  13912 
-instance (Pos (xi :+ xl),           -- decompose first arg
+instance (Pos (xi :* xl),           -- decompose first arg
           Nat y, DivMod10 yi yl y, -- decompose second arg
-          Pos (zi' :+ fl),
+          Pos (zi' :* fl),
           Add' xl yl f,            -- Add the first two digits of x and y
           DivMod10 fi fl f,        -- Obtain carryout of the previous sum
           Add' xi yi zi,           -- Add the other digits and the carryout 
           Add' zi fi zi') 
-  => Add' (xi :+ xl) y (zi' :+ fl)  
+  => Add' (xi :* xl) y (zi' :* fl)  
 -}
 
 -- | Addition type-level relation
@@ -235,13 +235,13 @@ instance (Add z y z', Mul' D8 y z) => Mul' D9 y z'
 -- ------
 -- 205515
 
-instance (Pos (xi :+ xl), -- Decompose the first arg (multiplier) 
+instance (Pos (xi :* xl), -- Decompose the first arg (multiplier) 
           Nat y,  -- Multiplicand
           Mul' xl y fr, -- Multiply using the last digit of the multiplier
                         -- obtaining the first row
           Mul' xi y rr, -- Multiply the rest.   
-          Add  fr (rr :+ D0) z -- Add the rows.
-   ) => Mul' (xi :+ xl) y z
+          Add  fr (rr :* D0) z -- Add the rows.
+   ) => Mul' (xi :* xl) y z
 
 
 {-
@@ -254,22 +254,22 @@ class (Pos x, Nat y, Nat z) => Mul' x y z | x y -> z, x z -> y
 
 -- by structural induction on the first argument
 instance Nat y => Mul' D1 y y
-instance (Mul' x y zh, DivMod10 zh D0 z) => Mul' (x :+ D0) y z
+instance (Mul' x y zh, DivMod10 zh D0 z) => Mul' (x :* D0) y z
 
-instance (Mul'F x y z,  Mul'B x y z) => Mul' (x :+ D1) y z
+instance (Mul'F x y z,  Mul'B x y z) => Mul' (x :* D1) y z
 
 -- We assert that (2x+1) * y = z with x > 0
 class (Pos x, Nat y, Nat z) => Mul'F x y z | x y -> z
 
 instance Pos x => Mul'F x D0 D0
-instance Pos x => Mul'F x D1 (x :+ D1)
+instance Pos x => Mul'F x D1 (x :* D1)
 
 -- (2x+1) * 2y
-instance (Mul'F x y z, Pos x, Pos y, Pos z) => Mul'F x (y :+ D0) (z :+ D0)
+instance (Mul'F x y z, Pos x, Pos y, Pos z) => Mul'F x (y :* D0) (z :* D0)
 
 -- (2x+1) * (2y+1) = 2*( (2x+1)*y + x ) + 1, y > 0
 instance (Mul'F x y z', Add x z' z, Pos x, Pos y, Pos z) 
-    => Mul'F x (y :+ D1) (z :+ D1)
+    => Mul'F x (y :* D1) (z :* D1)
 
 -- We assert that (2x+1) * y = z with x > 0
 -- The functional dependencies go the other way though
@@ -278,10 +278,10 @@ instance Pos x => Mul'B x D0 D0
 -- instance Pos x => Mul'B x y B1 -- cannot happen
 
 -- (2x+1) * 2y
-instance (Mul'B x y z, Pos x, Pos y, Pos z) => Mul'B x (y :+ D0) (z :+ D0)
+instance (Mul'B x y z, Pos x, Pos y, Pos z) => Mul'B x (y :* D0) (z :* D0)
 -- (2x+1) * (2y+1) = 2*( (2x+1)*y + x ) + 1, y >= 0
 instance (DivMod10 y D1 yt, Mul'B x y z', Add x z' z, Pos x, Pos z) 
-    => Mul'B x yt (z :+ D1)
+    => Mul'B x yt (z :* D1)
 -}
 
 -- | Multiplication type-level relation
@@ -331,8 +331,8 @@ instance Compare D0 D6 CLT
 instance Compare D0 D7 CLT
 instance Compare D0 D8 CLT
 instance Compare D0 D9 CLT
-instance Pos (yi :+ yl) => Compare D0 (yi :+ yl) CLT
-instance Pos (yi :+ yl) => Compare (yi :+ yl) D0 CGT
+instance Pos (yi :* yl) => Compare D0 (yi :* yl) CLT
+instance Pos (yi :* yl) => Compare (yi :* yl) D0 CGT
 -- D1
 instance Compare D1 D0 CGT
 instance Compare D1 D1 CEQ
@@ -344,8 +344,8 @@ instance Compare D1 D6 CLT
 instance Compare D1 D7 CLT 
 instance Compare D1 D8 CLT
 instance Compare D1 D9 CLT
-instance Pos (yi :+ yl) => Compare D1 (yi :+ yl) CLT
-instance Pos (yi :+ yl) => Compare (yi :+ yl) D1 CGT
+instance Pos (yi :* yl) => Compare D1 (yi :* yl) CLT
+instance Pos (yi :* yl) => Compare (yi :* yl) D1 CGT
 -- D2
 instance Compare D2 D0 CGT
 instance Compare D2 D1 CGT
@@ -357,8 +357,8 @@ instance Compare D2 D6 CLT
 instance Compare D2 D7 CLT
 instance Compare D2 D8 CLT
 instance Compare D2 D9 CLT
-instance Pos (yi :+ yl) => Compare D2 (yi :+ yl) CLT
-instance Pos (yi :+ yl) => Compare (yi :+ yl) D2 CGT
+instance Pos (yi :* yl) => Compare D2 (yi :* yl) CLT
+instance Pos (yi :* yl) => Compare (yi :* yl) D2 CGT
 -- D3
 instance Compare D3 D0 CGT
 instance Compare D3 D1 CGT
@@ -370,8 +370,8 @@ instance Compare D3 D6 CLT
 instance Compare D3 D7 CLT
 instance Compare D3 D8 CLT
 instance Compare D3 D9 CLT
-instance Pos (yi :+ yl) => Compare D3 (yi :+ yl) CLT
-instance Pos (yi :+ yl) => Compare (yi :+ yl) D3 CGT
+instance Pos (yi :* yl) => Compare D3 (yi :* yl) CLT
+instance Pos (yi :* yl) => Compare (yi :* yl) D3 CGT
 -- D4
 instance Compare D4 D0 CGT
 instance Compare D4 D1 CGT
@@ -383,8 +383,8 @@ instance Compare D4 D6 CLT
 instance Compare D4 D7 CLT
 instance Compare D4 D8 CLT
 instance Compare D4 D9 CLT
-instance Pos (yi :+ yl) => Compare D4 (yi :+ yl) CLT
-instance Pos (yi :+ yl) => Compare (yi :+ yl) D4 CGT
+instance Pos (yi :* yl) => Compare D4 (yi :* yl) CLT
+instance Pos (yi :* yl) => Compare (yi :* yl) D4 CGT
 -- D5
 instance Compare D5 D0 CGT
 instance Compare D5 D1 CGT
@@ -396,8 +396,8 @@ instance Compare D5 D6 CLT
 instance Compare D5 D7 CLT
 instance Compare D5 D8 CLT
 instance Compare D5 D9 CLT
-instance Pos (yi :+ yl) => Compare D5 (yi :+ yl) CLT
-instance Pos (yi :+ yl) => Compare (yi :+ yl) D5 CGT
+instance Pos (yi :* yl) => Compare D5 (yi :* yl) CLT
+instance Pos (yi :* yl) => Compare (yi :* yl) D5 CGT
 -- D6
 instance Compare D6 D0 CGT
 instance Compare D6 D1 CGT
@@ -409,8 +409,8 @@ instance Compare D6 D6 CEQ
 instance Compare D6 D7 CLT
 instance Compare D6 D8 CLT
 instance Compare D6 D9 CLT
-instance Pos (yi :+ yl) => Compare D6 (yi :+ yl) CLT
-instance Pos (yi :+ yl) => Compare (yi :+ yl) D6 CGT
+instance Pos (yi :* yl) => Compare D6 (yi :* yl) CLT
+instance Pos (yi :* yl) => Compare (yi :* yl) D6 CGT
 -- D7
 instance Compare D7 D0 CGT
 instance Compare D7 D1 CGT
@@ -422,8 +422,8 @@ instance Compare D7 D6 CGT
 instance Compare D7 D7 CEQ
 instance Compare D7 D8 CLT
 instance Compare D7 D9 CLT
-instance Pos (yi :+ yl) => Compare D7 (yi :+ yl) CLT
-instance Pos (yi :+ yl) => Compare (yi :+ yl) D7 CGT
+instance Pos (yi :* yl) => Compare D7 (yi :* yl) CLT
+instance Pos (yi :* yl) => Compare (yi :* yl) D7 CGT
 -- D8
 instance Compare D8 D0 CGT
 instance Compare D8 D1 CGT
@@ -435,8 +435,8 @@ instance Compare D8 D6 CGT
 instance Compare D8 D7 CGT
 instance Compare D8 D8 CEQ
 instance Compare D8 D9 CLT
-instance Pos (yi :+ yl) => Compare D8 (yi :+ yl) CLT
-instance Pos (yi :+ yl) => Compare (yi :+ yl) D8 CGT
+instance Pos (yi :* yl) => Compare D8 (yi :* yl) CLT
+instance Pos (yi :* yl) => Compare (yi :* yl) D8 CGT
 -- D9
 instance Compare D9 D0 CGT
 instance Compare D9 D1 CGT
@@ -448,13 +448,13 @@ instance Compare D9 D6 CGT
 instance Compare D9 D7 CGT
 instance Compare D9 D8 CGT
 instance Compare D9 D9 CEQ
-instance Pos (yi :+ yl) => Compare D9 (yi :+ yl) CLT
-instance Pos (yi :+ yl) => Compare (yi :+ yl) D9 CGT
+instance Pos (yi :* yl) => Compare D9 (yi :* yl) CLT
+instance Pos (yi :* yl) => Compare (yi :* yl) D9 CGT
 
 
 -- multidigit comparison
-instance (Pos (xi :+ xl), Pos (yi :+ yl), Compare xl yl rl, Compare xi yi ri,
-	  CS ri rl r) => Compare (xi :+ xl) (yi :+ yl) r
+instance (Pos (xi :* xl), Pos (yi :* yl), Compare xl yl rl, Compare xi yi ri,
+	  CS ri rl r) => Compare (xi :* xl) (yi :* yl) r
 
 -- strengthen the comparison relation
 class CS r1 r2 r3 | r1 r2 -> r3
@@ -515,17 +515,17 @@ instance DivMod10 D0 D6 D6
 instance DivMod10 D0 D7 D7
 instance DivMod10 D0 D8 D8
 instance DivMod10 D0 D9 D9
-instance (Nat (D1 :+ l)) => DivMod10 D1 l  (D1 :+ l)
-instance (Nat (D2 :+ l)) => DivMod10 D2 l  (D2 :+ l)
-instance (Nat (D3 :+ l)) => DivMod10 D3 l  (D3 :+ l)
-instance (Nat (D4 :+ l)) => DivMod10 D4 l  (D4 :+ l)
-instance (Nat (D5 :+ l)) => DivMod10 D5 l  (D5 :+ l)
-instance (Nat (D6 :+ l)) => DivMod10 D6 l  (D6 :+ l)
-instance (Nat (D7 :+ l)) => DivMod10 D7 l  (D7 :+ l)
-instance (Nat (D8 :+ l)) => DivMod10 D8 l  (D8 :+ l)
-instance (Nat (D9 :+ l)) => DivMod10 D9 l  (D9 :+ l)
-instance (Nat (x :+ l), Nat ((x :+ l) :+ l')) => 
-  DivMod10 (x :+ l) l' ((x :+ l) :+ l')
+instance (Nat (D1 :* l)) => DivMod10 D1 l  (D1 :* l)
+instance (Nat (D2 :* l)) => DivMod10 D2 l  (D2 :* l)
+instance (Nat (D3 :* l)) => DivMod10 D3 l  (D3 :* l)
+instance (Nat (D4 :* l)) => DivMod10 D4 l  (D4 :* l)
+instance (Nat (D5 :* l)) => DivMod10 D5 l  (D5 :* l)
+instance (Nat (D6 :* l)) => DivMod10 D6 l  (D6 :* l)
+instance (Nat (D7 :* l)) => DivMod10 D7 l  (D7 :* l)
+instance (Nat (D8 :* l)) => DivMod10 D8 l  (D8 :* l)
+instance (Nat (D9 :* l)) => DivMod10 D9 l  (D9 :* l)
+instance (Nat (x :* l), Nat ((x :* l) :* l')) => 
+  DivMod10 (x :* l) l' ((x :* l) :* l')
 
 -- classify a natural as positive or zero
 data Z
@@ -541,4 +541,4 @@ instance NClassify D6 P
 instance NClassify D7 P
 instance NClassify D8 P
 instance NClassify D9 P
-instance Pos x => NClassify (x :+ d) P
+instance Pos x => NClassify (x :* d) P
