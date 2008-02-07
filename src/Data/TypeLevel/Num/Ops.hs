@@ -466,7 +466,8 @@ instance CS CLT r CLT
 
 -- | Equality abbreviated type-level assertion
 class x :==: y
-instance (Compare x y CEQ) => (:==:) x y 
+instance (Compare x y CEQ) => (:==:) x y -- ??? x :==: y fires an error 
+                                         -- with ghc 6.8.2 
 
 
 -- | Greater-than abbreviated type-level assertion
