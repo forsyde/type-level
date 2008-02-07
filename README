@@ -1,0 +1,40 @@
+type-level: Type-level programming library
+
+DESCRIPTION
+
+ This library permits performing computations on the type-level. Type-level 
+ functions are implemented using functional dependencies of multi
+ parameter type classes. To date, common arithmetic operations (addition, 
+ substraction, multiplication, division, maximum, comparison, GCD) 
+ over natural numbers (using a decimal representation to make compile-time 
+ errors friendlier) are supported. 
+
+ Although making use of type-level computations might seem devious and
+ obfuscated at first sight, it is indeed useful in practice to implement 
+ lightweight dependent types such us number-parameterized types (e.g. an array 
+ type parameterized by the array's size or a modular group type Zn 
+ parameterized by the modulus).
+
+DEPENDENCIES
+ 
+ type-level depends on GHC (due to the use of Multiparameter Type Classes and 
+ infix type constructors) and Template Haskell
+
+INSTALLATION
+
+to install globally, for the whole system (requires admin permissions)
+
+$ ./Setup.hs configure
+$ ./Setup.hs build
+$ ./Setup.hs haddock # generate documentation, optional, 
+                     # requires Haddock > 2.0 due to the use of TH
+$ ./Setup.hs install
+
+to install locally and just for your own user
+
+$ ./Setup.hs configure --prefix=The/selected/local/directory
+$ ./Setup.hs build
+$ ./Setup.hs haddock  # generate documentation, optional, 
+                      # requires Haddock > 2.0 due to the use of TH
+
+$ ./Setup.hs install --user
