@@ -17,26 +17,28 @@
 ----------------------------------------------------------------------------
 module Data.TypeLevel.Num.Ops 
  (-- * Successor/Predecessor
-  Succ, succRef,
-  Pred, predRef,
+  Succ, succ,
+  Pred, pred,
   -- * Addition/Subtraction
-  Add, addRef,
-  Sub, subRef,
+  Add, (+),
+  Sub, (-),
   -- * Multiplication/Division
-  Mul, mulRef,
-  Div, divRef,
+  Mul, (*),
+  Div, div,
   -- * Comparison assertions
   -- ** General comparison assertion
   Compare,
   -- *** Type-level values denoting comparison results
   CLT, CEQ, CGT,
   -- ** Abbreviated comparison assertions
-  (:==:), (:>:), (:<:), (:>=:), (:<=:) 
+  (:==:), (:>:), (:<:), (:>=:), (:<=:),
+  (==)  , (>)  , (<)  , (>=)  , (<=) 
   ) where
 
 import Data.TypeLevel.Num.Reps
 import Data.TypeLevel.Num.Sets
-
+import Prelude hiding 
+ (succ, pred, (+), (-), (*), div, (==), (>), (<), (<), (>=), (<=))
 
 -------------------------
 -- Successor, Predecessor
@@ -109,8 +111,8 @@ instance Succ' x y => Succ x y
 
 -- | value-level reflection function for the succesor type-level relation
 --   (named succRef to avoid a clash with 'Prelude.succ')
-succRef :: Succ x y => x -> y
-succRef = undefined
+succ :: Succ x y => x -> y
+succ = undefined
 
 -- Note: maybe redundant 
 -- | Predecessor type-level relation
@@ -119,8 +121,8 @@ instance Succ x y => Pred y x
 
 -- | value-level reflection function for the predecessor type-level relation
 --   (named succRef to avoid a clash with 'Prelude.pred')
-predRef :: Pred x y => x -> y
-predRef = undefined
+pred :: Pred x y => x -> y
+pred = undefined
 
 
 
@@ -192,16 +194,16 @@ instance (Add' x y z, Add' y x z) => Add x y z
 
 
 -- | value-level reflection function for the addition type-level relation 
-addRef :: (Add x y z) => x -> y -> z
-addRef = undefined
+(+) :: (Add x y z) => x -> y -> z
+(+) = undefined
 
 -- | Subtraction type-level relation
 class Sub x y z | x y -> z, z x -> y, z y -> x
 instance Add x y z => Sub z y x
 
 -- | value-level reflection function for the addition type-level relation 
-subRef :: (Sub x y z) => x -> y -> z
-subRef = undefined
+(-) :: (Sub x y z) => x -> y -> z
+(-) = undefined
 
 ------------------------------
 -- Multiplication and Division
@@ -289,8 +291,8 @@ class (Mul' x y z, Mul' y x z) => Mul x y z | x y -> z, x z -> y, y z -> x
 instance (Mul' x y z, Mul' y x z) => Mul x y z
 
 -- | value-level reflection function for the multiplication type-level relation 
-mulRef :: Mul x y z => x -> y -> z
-mulRef = undefined
+(*) :: Mul x y z => x -> y -> z
+(*) = undefined
 
 -- | Division type-level relation
 --  FIXME: Broken! (due to multiplication not being relational)
@@ -298,8 +300,8 @@ class Div x y z | x y -> z, x z -> y, y z -> x
 instance (Mul x y z) => Div z y x
 
 -- | value-level reflection function for the division type-level relation 
-divRef :: Mul x y z => z -> x -> y
-divRef = undefined
+div :: Mul x y z => z -> x -> y
+div = undefined
 
 
 -------------
@@ -318,6 +320,9 @@ data CGT
 -- | General comparison type-level assertion
 class (Nat x, Nat y) => Compare x y r | x y -> r
 
+-- | value-level reflection function for the comparison type-level assertion 
+cmp :: Compare x y r => z -> x -> r
+cmp = undefined
 
 -- by structural induction on the first, and then the second argument
 -- D0
@@ -469,26 +474,46 @@ class x :==: y
 instance (Compare x y CEQ) => (:==:) x y -- ??? x :==: y fires an error 
                                          -- with ghc 6.8.2 
 
+-- | value-level reflection function for the equality abbreviated 
+--   type-level assertion 
+(==) :: (x :==: y) => x -> y
+(==) = undefined
 
 -- | Greater-than abbreviated type-level assertion
 class x :>: y
 instance (Compare x y CGT) => (:>:) x y 
 
+-- | value-level reflection function for the equality abbreviated 
+--   type-level assertion 
+(>) :: (x :>: y) => x -> y
+(>) = undefined
 
 -- | Lower-than abbreviated type-level assertion
 class x :<: y
 instance (Compare x y CLT) => (:<:) x y 
 
+-- | value-level reflection function for the lower-than abbreviated 
+--   type-level assertion 
+(<) :: (x :<: y) => x -> y
+(<) = undefined
 
 -- | Greater-than or equal abbreviated type-level assertion
 class x :>=: y
 instance (Succ x x', Compare x' y CGT) => (:>=:) x y 
 
+-- | value-level reflection function for the greater-than or equal abbreviated 
+--   type-level assertion 
+(>=) :: (x :>=: y) => x -> y
+(>=) = undefined
 
 -- | Lower-than or equal abbreviated type-level assertion
 class x :<=: y
 instance (Succ x' x, Compare x' y CLT) => (:<=:) x y
 
+-- | value-level reflection function for the lower-than or equal abbreviated 
+--   type-level assertion 
+(<=) :: (x :<=: y) => x -> y
+(<=) = undefined
 
 
 ---------------------
