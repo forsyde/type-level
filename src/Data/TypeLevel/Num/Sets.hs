@@ -1,5 +1,6 @@
 {-# LANGUAGE TypeOperators, FlexibleInstances, FlexibleContexts,
-             UndecidableInstances #-}
+             UndecidableInstances, PatternSignatures, ScopedTypeVariables,
+             Rank2Types #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.TypeLevel.Num.Sets
@@ -15,7 +16,7 @@
 -- Positives.
 -- 
 ----------------------------------------------------------------------------
-module Data.TypeLevel.Num.Sets (Pos, Nat, toNum, toInt) where 
+module Data.TypeLevel.Num.Sets (Pos, Nat, toNum, toInt, reifyIntegral) where 
 
 import Data.TypeLevel.Num.Reps
 
@@ -122,6 +123,35 @@ instance PosI x => PosI (x :* D7)
 instance PosI x => PosI (x :* D8)
 instance PosI x => PosI (x :* D9)
 
+
+-- | Reification function. In CPS style (best possible solution)
+reifyIntegral :: Integral i => i -> (forall n . Nat n => n -> r) -> r
+reifyIntegral i f 
+ | i < 0     = error "reifyIntegral: integral < 0"
+ | i == 0    = f (undefined :: D0)
+ | otherwise = reifyIntegralp i f 
+       -- reifyIntegral for positives
+ where reifyIntegralp :: Integral i => i -> (forall n . Pos n => n -> r) -> r
+       reifyIntegralp i f 
+         | i < 10 = case i of
+                     1 -> f (undefined :: D1)
+                     2 -> f (undefined :: D2); 3 -> f (undefined :: D3)
+                     4 -> f (undefined :: D4); 5 -> f (undefined :: D5)
+                     6 -> f (undefined :: D6); 7 -> f (undefined :: D7)
+                     8 -> f (undefined :: D8); 9 -> f (undefined :: D9)
+         | otherwise =  
+            case m of
+              0 -> reifyIntegralp d (\ (_::e) -> f (undefined :: e :* D0)) 
+              1 -> reifyIntegralp d (\ (_::e) -> f (undefined :: e :* D1))
+              2 -> reifyIntegralp d (\ (_::e) -> f (undefined :: e :* D2))
+              3 -> reifyIntegralp d (\ (_::e) -> f (undefined :: e :* D3))
+              4 -> reifyIntegralp d (\ (_::e) -> f (undefined :: e :* D4))
+              5 -> reifyIntegralp d (\ (_::e) -> f (undefined :: e :* D5))
+              6 -> reifyIntegralp d (\ (_::e) -> f (undefined :: e :* D6))
+              7 -> reifyIntegralp d (\ (_::e) -> f (undefined :: e :* D7))
+              8 -> reifyIntegralp d (\ (_::e) -> f (undefined :: e :* D8))
+              9 -> reifyIntegralp d (\ (_::e) -> f (undefined :: e :* D9))      
+           where (d,m) = divMod i 10
 
 
 ---------------------
