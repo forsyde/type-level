@@ -15,7 +15,7 @@
 -- Positives.
 -- 
 ----------------------------------------------------------------------------
-module Data.TypeLevel.Num.Sets (Pos, Nat, toInt) where 
+module Data.TypeLevel.Num.Sets (Pos, Nat, toNum, toInt) where 
 
 import Data.TypeLevel.Num.Reps
 
@@ -30,7 +30,14 @@ import Data.TypeLevel.Num.Reps
 
 -- | Naturals (Positives without zero), internal version
 class NatI n where 
- toInt :: n -> Int -- Reflection function
+-- | Reflecting function
+ toNum :: Num a => n -> a -- Reflection function
+
+-- | Less generic reflecting function (Int)
+toInt :: Nat n => n -> Int
+toInt =  toNum
+
+
 
 -- | Positives (Naturals without zero), internal version
 class NatI n => PosI n
@@ -62,16 +69,16 @@ instance PosI n => Pos n
 --       However, type-splicing is not yet implemented in GHC :S
 
 -- monodigit naturals
-instance NatI D0 where toInt _ = 0
-instance NatI D1 where toInt _ = 1
-instance NatI D2 where toInt _ = 2
-instance NatI D3 where toInt _ = 3
-instance NatI D4 where toInt _ = 4
-instance NatI D5 where toInt _ = 5
-instance NatI D6 where toInt _ = 6
-instance NatI D7 where toInt _ = 7
-instance NatI D8 where toInt _ = 8
-instance NatI D9 where toInt _ = 9
+instance NatI D0 where toNum _ = fromInteger 0
+instance NatI D1 where toNum _ = fromInteger 1
+instance NatI D2 where toNum _ = fromInteger 2
+instance NatI D3 where toNum _ = fromInteger 3
+instance NatI D4 where toNum _ = fromInteger 4
+instance NatI D5 where toNum _ = fromInteger 5
+instance NatI D6 where toNum _ = fromInteger 6
+instance NatI D7 where toNum _ = fromInteger 7
+instance NatI D8 where toNum _ = fromInteger 8
+instance NatI D9 where toNum _ = fromInteger 9
 
 -- multidigit naturals
 -- Note: The PosI constraint guarantees that all valid representations are 
@@ -79,16 +86,16 @@ instance NatI D9 where toInt _ = 9
 -- Note as well that ill-formed representations such as
 -- (D1 :* D2) :* (D3 :* D4) are not recognized as instances of
 -- naturals nor positives.
-instance PosI x => NatI (x :* D0) where toInt n = subLastDec n
-instance PosI x => NatI (x :* D1) where toInt n = subLastDec n + 1
-instance PosI x => NatI (x :* D2) where toInt n = subLastDec n + 2
-instance PosI x => NatI (x :* D3) where toInt n = subLastDec n + 3
-instance PosI x => NatI (x :* D4) where toInt n = subLastDec n + 4
-instance PosI x => NatI (x :* D5) where toInt n = subLastDec n + 5
-instance PosI x => NatI (x :* D6) where toInt n = subLastDec n + 6
-instance PosI x => NatI (x :* D7) where toInt n = subLastDec n + 7
-instance PosI x => NatI (x :* D8) where toInt n = subLastDec n + 8
-instance PosI x => NatI (x :* D9) where toInt n = subLastDec n + 9
+instance PosI x => NatI (x :* D0) where toNum n = subLastDec n
+instance PosI x => NatI (x :* D1) where toNum n = subLastDec n + fromInteger 1
+instance PosI x => NatI (x :* D2) where toNum n = subLastDec n + fromInteger 2
+instance PosI x => NatI (x :* D3) where toNum n = subLastDec n + fromInteger 3
+instance PosI x => NatI (x :* D4) where toNum n = subLastDec n + fromInteger 4
+instance PosI x => NatI (x :* D5) where toNum n = subLastDec n + fromInteger 5
+instance PosI x => NatI (x :* D6) where toNum n = subLastDec n + fromInteger 6
+instance PosI x => NatI (x :* D7) where toNum n = subLastDec n + fromInteger 7
+instance PosI x => NatI (x :* D8) where toNum n = subLastDec n + fromInteger 8
+instance PosI x => NatI (x :* D9) where toNum n = subLastDec n + fromInteger 9
 
 -- monodigit positives
 instance PosI D1
@@ -124,8 +131,8 @@ instance PosI x => PosI (x :* D9)
 -- substract the last digit of a decimal type-level numeral and obtain 
 -- the result's reflected value 
 {-# INLINE subLastDec #-}
-subLastDec :: (NatI x, NatI (x :* d)) => x :* d -> Int 
-subLastDec = (10*).toInt.div10Dec
+subLastDec :: (Num a, NatI (x :* d), NatI x) => x :* d -> a
+subLastDec = (10*).toNum.div10Dec
 
 -- Divide a decimal type-level numeral by 10 
 {-# INLINE div10Dec #-} 
