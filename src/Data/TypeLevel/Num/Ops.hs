@@ -245,10 +245,23 @@ instance (Pos (xi :* xl), -- Decompose the first arg (multiplier)
           Nat y,  -- Multiplicand
           Mul' xl y fr, -- Multiply using the last digit of the multiplier
                         -- obtaining the first row
-          Mul' xi y rr, -- Multiply the rest.   
-          Add  fr (rr :* D0) z -- Add the rows.
+          Mul' xi y rr, -- Multiply the rest.
+          Mul10 rr rr',   
+          Add  fr rr' z -- Add the rows.
    ) => Mul' (xi :* xl) y z
 
+class Mul10 x y | x -> y, y -> x
+instance Mul10 D0 D0
+instance Mul10 D1 (D1 :* D0)
+instance Mul10 D2 (D2 :* D0)
+instance Mul10 D3 (D3 :* D0)
+instance Mul10 D4 (D4 :* D0)
+instance Mul10 D5 (D5 :* D0)   
+instance Mul10 D6 (D6 :* D0)
+instance Mul10 D7 (D7 :* D0)
+instance Mul10 D8 (D8 :* D0)
+instance Mul10 D9 (D9 :* D0)   
+instance Pos (xi :* xl)  => Mul10 (xi :* xl) (xi :* xl :* D0)
 
 {-
 
