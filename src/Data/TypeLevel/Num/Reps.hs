@@ -1,4 +1,4 @@
-{-# LANGUAGE EmptyDataDecls, TypeOperators #-}
+{-# LANGUAGE EmptyDataDecls, TypeOperators, DeriveDataTypeable #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.TypeLevel.Num.Reps
@@ -20,9 +20,10 @@ module Data.TypeLevel.Num.Reps (
  --  ** Digits
  D0, D1, D2, D3, D4, D5, D6, D7, D8, D9,
  --  ** Connective
- (:*),
+ (:*)(..),
  ) where
 
+import Data.Generics (Typeable)
 
 -------------------------
 -- Decimal Representation
@@ -36,28 +37,28 @@ module Data.TypeLevel.Num.Reps (
 -- negative numbers cannot be represented.
 
 -- | Decimal digit zero
-data D0
+data D0 deriving Typeable
 -- | Decimal digit one
-data D1
+data D1 deriving Typeable
 -- | Decimal digit two
-data D2
+data D2 deriving Typeable
 -- | Decimal digit three 
-data D3
+data D3 deriving Typeable
 -- | Decimal digit four 
-data D4
+data D4 deriving Typeable
 -- | Decimal digit five
-data D5
+data D5 deriving Typeable
 -- | Decimal digit six
-data D6
+data D6 deriving Typeable
 -- | Decimal digit seven
-data D7
+data D7 deriving Typeable
 -- | Decimal digit eight
-data D8
+data D8 deriving Typeable
 -- | Decimal digit nine
-data D9
+data D9 deriving Typeable
 
 -- | Connective to glue digits together.
 --   For example, @D1 :* D0 :* D0@ represents the decimal number 100
-data a :* b = a :* b 
+data a :* b = a :* b deriving Typeable
 
 
