@@ -27,18 +27,22 @@ module Data.TypeLevel.Num.Ops
   Div, div,
   -- * Comparison assertions
   -- ** General comparison assertion
-  Compare,
+  Compare, cmp,
   -- *** Type-level values denoting comparison results
   CLT, CEQ, CGT,
   -- ** Abbreviated comparison assertions
   (:==:), (:>:), (:<:), (:>=:), (:<=:),
-  (==)  , (>)  , (<)  , (>=)  , (<=) 
-  ) where
+  (==)  , (>)  , (<)  , (>=)  , (<=), 
+  -- ** Maximum/Minimum
+  Max, max,
+  Min, min,
+  
+ ) where
 
 import Data.TypeLevel.Num.Reps
 import Data.TypeLevel.Num.Sets
 import Prelude hiding 
- (succ, pred, (+), (-), (*), div, (==), (>), (<), (<), (>=), (<=))
+ (succ, pred, (+), (-), (*), div, (==), (>), (<), (<), (>=), (<=), max, min)
 
 -------------------------
 -- Successor, Predecessor
@@ -514,6 +518,33 @@ instance (Succ x' x, Compare x' y CLT) => (:<=:) x y
 --   type-level assertion 
 (<=) :: (x :<=: y) => x -> y
 (<=) = undefined
+
+------------------
+-- Maximum/Minimum
+------------------
+
+-- Choose the largest of x and y in the order b
+class Max' x y b r | x y b -> r
+instance Max' x y CLT y
+instance Max' x y CEQ y
+instance Max' x y CGT x
+
+-- | Maximum type-level relation
+class Max x y z | x y -> z
+instance (Max' x y b z, Compare x y b) => Max x y z
+
+-- | value-level reflection function for the maximum type-level relation
+max :: Max x y z => x -> y -> z
+max = undefined
+
+-- | Minimum type-level relation
+class Min x y z | x y -> z
+instance (Max' y x b z, Compare x y b) => Min x y z
+
+
+-- | value-level reflection function for the minimum type-level relation
+min :: Min x y z => x -> y -> z
+min = undefined
 
 
 ---------------------
