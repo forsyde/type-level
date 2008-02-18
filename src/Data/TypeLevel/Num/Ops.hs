@@ -149,8 +149,14 @@ instance (Succ z z', Add' D6 y z) => Add' D7 y z'
 instance (Succ z z', Add' D7 y z) => Add' D8 y z'
 instance (Succ z z', Add' D8 y z) => Add' D9 y z'
 -- multidigit addition
-instance (Pos x, Pos (zi :* zl), Add' x yi zi, DivMod10 yi yl y)
-    => Add' (x :* D0) y (zi :* zl)
+-- TODO: explain
+instance (Pos (xi :* xl), Nat z, Add' xi yi zi, DivMod10 yi yl y, Add' xl (zi :* yl) z)
+    => Add' (xi :* xl) y z
+{-
+The rule above can be extended to:
+
+instance (Pos x, Pos (zi :* yl), Add' x yi zi, DivMod10 yi yl y)
+    => Add' (x :* D0) y (zi :* yl)
 instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Succ (zi :* yl) z)
     => Add' (x :* D1) y z
 instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D2 (zi :* yl) z)
@@ -169,7 +175,7 @@ instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D8 (zi :* yl) z)
     => Add' (x :* D8) y z
 instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D9 (zi :* yl) z)
     => Add' (x :* D9) y z
-
+-}
 
 {-
 
@@ -227,7 +233,38 @@ instance (Add z y z', Mul' D5 y z) => Mul' D6 y z'
 instance (Add z y z', Mul' D6 y z) => Mul' D7 y z'
 instance (Add z y z', Mul' D7 y z) => Mul' D8 y z'
 instance (Add z y z', Mul' D8 y z) => Mul' D9 y z'
--- Nice, but not relational multidigit multiplication
+-- TODO explain.
+instance (Pos (xi :* xl), Nat y, Mul' xi y z, Mul10 z z10, Mul' xl y dy, 
+          Add dy z10 z')  => Mul' (xi :* xl) y z'
+
+
+
+{-
+
+Extended version of the rule above
+instance (Pos x, Nat y, Nat z', Mul' x y z, Mul10 z z')  => Mul' (x :* D0) y z'
+instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Add y z10 z') 
+  => Mul' (x :* D1) y z'
+instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Add y y dy, Add dy z10 z') 
+  => Mul' (x :* D2) y z'
+instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D3 y dy, Add dy z10 z') 
+  => Mul' (x :* D3) y z'
+instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D4 y dy, Add dy z10 z') 
+  => Mul' (x :* D4) y z'
+instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D5 y dy, Add dy z10 z') 
+  => Mul' (x :* D5) y z'
+instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D6 y dy, Add dy z10 z') 
+  => Mul' (x :* D6) y z'
+instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D7 y dy, Add dy z10 z') 
+  => Mul' (x :* D7) y z'
+instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D8 y dy, Add dy z10 z') 
+  => Mul' (x :* D8) y z'
+instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D9 y dy, Add dy z10 z') 
+  => Mul' (x :* D9) y z'
+-}
+
+{-
+-- Nice (but not relational) multidigit multiplication
 
 -- FIXME: not being relational breaks division!
 --
@@ -249,19 +286,9 @@ instance (Pos (xi :* xl), -- Decompose the first arg (multiplier)
           Mul10 rr rr',   
           Add  fr rr' z -- Add the rows.
    ) => Mul' (xi :* xl) y z
+-}
 
-class Mul10 x y | x -> y, y -> x
-instance Mul10 D0 D0
-instance Mul10 D1 (D1 :* D0)
-instance Mul10 D2 (D2 :* D0)
-instance Mul10 D3 (D3 :* D0)
-instance Mul10 D4 (D4 :* D0)
-instance Mul10 D5 (D5 :* D0)   
-instance Mul10 D6 (D6 :* D0)
-instance Mul10 D7 (D7 :* D0)
-instance Mul10 D8 (D8 :* D0)
-instance Mul10 D9 (D9 :* D0)   
-instance Pos (xi :* xl)  => Mul10 (xi :* xl) (xi :* xl :* D0)
+
 
 {-
 
@@ -317,7 +344,7 @@ class Div x y z | x y -> z, x z -> y, y z -> x
 instance (Mul x y z) => Div z y x
 
 -- | value-level reflection function for the division type-level relation 
-div :: Mul x y z => z -> x -> y
+div :: Div x y z => x -> y -> z
 div = undefined
 
 
@@ -564,6 +591,9 @@ min = undefined
 -- Internal functions
 ---------------------
 
+-- multiply by 10
+class (Nat x, Nat y) => Mul10 x y | x -> y, y -> x
+instance DivMod10 x D0 z => Mul10 x z
 
 -- Spliting a decimal numeral into its initial digits and last digit
 -- DivMod10 i l x 
@@ -571,7 +601,6 @@ min = undefined
 --  i = x `div` 10 (init, all digits but the last one)
 --  l = x `mod` 10 (last, last digit)
 -- Essentially, this is the general, non-structural, constructor/deconstructor
-
 class (Nat i, Nat x) => DivMod10 i l x | i l -> x, x -> i l
 
 instance DivMod10 D0 D0 D0
