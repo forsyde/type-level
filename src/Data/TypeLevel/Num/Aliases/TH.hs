@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# OPTIONS_GHC -fno-warn-incomplete-patterns #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.TypeLevel.Num.Aliases

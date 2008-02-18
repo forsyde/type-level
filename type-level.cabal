@@ -42,4 +42,4 @@ Library
                    Data.TypeLevel.Num.Sets,
                    Data.TypeLevel.Num.Ops
   other-modules:   Data.TypeLevel.Num.Aliases.TH
-  ghc-options:	-Wall 
+  ghc-options:	-Wall -O2
