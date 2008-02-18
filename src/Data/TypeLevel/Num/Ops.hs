@@ -25,6 +25,14 @@ module Data.TypeLevel.Num.Ops
   -- * Multiplication/Division
   Mul, (*),
   Div, div,
+  DivMod, divMod,
+  -- ** Special efficiency cases
+  Mul10, mul10,
+  Div10, div10,
+  DivMod10, divMod10,
+  -- * Base-10 Exponentiation/Logarithm
+  Exp10, exp10,
+  Log10, log10,
   -- * Comparison assertions
   -- ** General comparison assertion
   Compare, cmp,
@@ -33,16 +41,18 @@ module Data.TypeLevel.Num.Ops
   -- ** Abbreviated comparison assertions
   (:==:), (:>:), (:<:), (:>=:), (:<=:),
   (==)  , (>)  , (<)  , (>=)  , (<=), 
-  -- ** Maximum/Minimum
+  -- * Maximum/Minimum
   Max, max,
   Min, min,
-  
+  -- * Greatest Common Divisor
+  GCD, gcd
  ) where
 
 import Data.TypeLevel.Num.Reps
 import Data.TypeLevel.Num.Sets
 import Prelude hiding 
- (succ, pred, (+), (-), (*), div, (==), (>), (<), (<), (>=), (<=), max, min)
+ (succ, pred, (+), (-), (*), div, divMod,
+  (==), (>), (<), (<), (>=), (<=), max, min, gcd)
 
 -------------------------
 -- Successor, Predecessor
@@ -52,8 +62,8 @@ import Prelude hiding
 class (Nat x, Pos y) => Succ x y | x -> y, y -> x
 
 
-instance (Pos y, NClassify y yc, DivMod10 xh xl x, Succ' xh xl yh yl yc,
-         DivMod10 yh yl y)
+instance (Pos y, NClassify y yc, DivMod10 x xi xl, Succ' xi xl yi yl yc,
+         DivMod10 y yi yl)
    => Succ x y
 
 class Succ' xh xl yh yl yc | xh xl -> yh yl yc, yh yl yc -> xh xl
@@ -68,16 +78,16 @@ class Failure t
 data PredecessorOfZeroError t
  
 instance Failure (PredecessorOfZeroError x) => Succ' (x,x) (x,x) D0 D0 Z
-instance Succ' xh D0 xh D1 P
-instance Succ' xh D1 xh D2 P
-instance Succ' xh D2 xh D3 P
-instance Succ' xh D3 xh D4 P
-instance Succ' xh D4 xh D5 P
-instance Succ' xh D5 xh D6 P
-instance Succ' xh D6 xh D7 P
-instance Succ' xh D7 xh D8 P
-instance Succ' xh D8 xh D9 P
-instance Succ xh yh => Succ' xh D9 yh D0 P
+instance Succ' xi D0 xi D1 P
+instance Succ' xi D1 xi D2 P
+instance Succ' xi D2 xi D3 P
+instance Succ' xi D3 xi D4 P
+instance Succ' xi D4 xi D5 P
+instance Succ' xi D5 xi D6 P
+instance Succ' xi D6 xi D7 P
+instance Succ' xi D7 xi D8 P
+instance Succ' xi D8 xi D9 P
+instance Succ xi yi => Succ' xi D9 yi D0 P
 
 
 {-
@@ -114,7 +124,6 @@ instance Succ' x y => Succ x y
 -}
 
 -- | value-level reflection function for the succesor type-level relation
---   (named succRef to avoid a clash with 'Prelude.succ')
 succ :: Succ x y => x -> y
 succ = undefined
 
@@ -150,30 +159,30 @@ instance (Succ z z', Add' D7 y z) => Add' D8 y z'
 instance (Succ z z', Add' D8 y z) => Add' D9 y z'
 -- multidigit addition
 -- TODO: explain
-instance (Pos (xi :* xl), Nat z, Add' xi yi zi, DivMod10 yi yl y, Add' xl (zi :* yl) z)
+instance (Pos (xi :* xl), Nat z, Add' xi yi zi, DivMod10 y yi yl, Add' xl (zi :* yl) z)
     => Add' (xi :* xl) y z
 {-
 The rule above can be extended to:
 
-instance (Pos x, Pos (zi :* yl), Add' x yi zi, DivMod10 yi yl y)
+instance (Pos x, Pos (zi :* yl), Add' x yi zi, DivMod10 y yi yl)
     => Add' (x :* D0) y (zi :* yl)
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Succ (zi :* yl) z)
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Succ (zi :* yl) z)
     => Add' (x :* D1) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D2 (zi :* yl) z)
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D2 (zi :* yl) z)
     => Add' (x :* D2) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D3 (zi :* yl) z)
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D3 (zi :* yl) z)
     => Add' (x :* D3) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D4 (zi :* yl) z)
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D4 (zi :* yl) z)
     => Add' (x :* D4) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D5 (zi :* yl) z)
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D5 (zi :* yl) z)
     => Add' (x :* D5) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D6 (zi :* yl) z)
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D6 (zi :* yl) z)
     => Add' (x :* D6) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D7 (zi :* yl) z)
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D7 (zi :* yl) z)
     => Add' (x :* D7) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D8 (zi :* yl) z)
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D8 (zi :* yl) z)
     => Add' (x :* D8) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D9 (zi :* yl) z)
+instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D9 (zi :* yl) z)
     => Add' (x :* D9) y z
 -}
 
@@ -189,10 +198,10 @@ instance (Pos x, Nat z, Add' x yi zi, DivMod10 yi yl y, Add' D9 (zi :* yl) z)
 --   ----                     ( ((5 + 7) div 10) + (456 + 934) ) * 10  
 --  13912 
 instance (Pos (xi :* xl),           -- decompose first arg
-          Nat y, DivMod10 yi yl y, -- decompose second arg
+          Nat y, DivMod10 y yi yl, -- decompose second arg
           Pos (zi' :* fl),
           Add' xl yl f,            -- Add the first two digits of x and y
-          DivMod10 fi fl f,        -- Obtain carryout of the previous sum
+          DivMod10 f fi fl,        -- Obtain carryout of the previous sum
           Add' xi yi zi,           -- Add the other digits and the carryout 
           Add' zi fi zi') 
   => Add' (xi :* xl) y (zi' :* fl)  
@@ -219,6 +228,9 @@ instance Add x y z => Sub z y x
 -- Multiplication and Division
 ------------------------------
 
+-----------------
+-- Multiplication
+-----------------
 
 class (Nat x, Nat y, Nat z) => Mul' x y z | x y -> z, x z -> y
 
@@ -226,6 +238,14 @@ class (Nat x, Nat y, Nat z) => Mul' x y z | x y -> z, x z -> y
 instance Nat y => Mul' D0 y D0
 instance Nat y => Mul' D1 y y
 instance Add y y z => Mul' D2 y z
+-- IMPORTANT: changing the line above by the commented line below
+--            would make multiplication relational. However, that would
+--            happen at the cost of performing a division by 2 in every 
+--            multiplication which doesn't pay off.
+--            Besides, the Division algortihm obtained out of the 
+--            inverse of Mul can only work when the remainder is zero, 
+--            which isn't really useful.
+-- instance (Add y y z, DivMod z D2 y D0) => Mul' D2 y z
 instance (Add z y z', Mul' D2 y z) => Mul' D3 y z'
 instance (Add z y z', Mul' D3 y z) => Mul' D4 y z'
 instance (Add z y z', Mul' D4 y z) => Mul' D5 y z'
@@ -300,7 +320,7 @@ class (Pos x, Nat y, Nat z) => Mul' x y z | x y -> z, x z -> y
 
 -- by structural induction on the first argument
 instance Nat y => Mul' D1 y y
-instance (Mul' x y zh, DivMod10 zh D0 z) => Mul' (x :* D0) y z
+instance (Mul' x y zh, DivMod10 z zh D0) => Mul' (x :* D0) y z
 
 instance (Mul'F x y z,  Mul'B x y z) => Mul' (x :* D1) y z
 
@@ -326,11 +346,14 @@ instance Pos x => Mul'B x D0 D0
 -- (2x+1) * 2y
 instance (Mul'B x y z, Pos x, Pos y, Pos z) => Mul'B x (y :* D0) (z :* D0)
 -- (2x+1) * (2y+1) = 2*( (2x+1)*y + x ) + 1, y >= 0
-instance (DivMod10 y D1 yt, Mul'B x y z', Add x z' z, Pos x, Pos z) 
+instance (DivMod10 yt y D1, Mul'B x y z', Add x z' z, Pos x, Pos z) 
     => Mul'B x yt (z :* D1)
 -}
 
 -- | Multiplication type-level relation
+--   Note it isn't relational (i.e. its inverse cannot be used for division,
+--   however, even if it could, the resulting division would only
+--   work for zero-remainder divisions)
 class (Mul' x y z, Mul' y x z) => Mul x y z | x y -> z, x z -> y, y z -> x
 instance (Mul' x y z, Mul' y x z) => Mul x y z
 
@@ -338,15 +361,128 @@ instance (Mul' x y z, Mul' y x z) => Mul x y z
 (*) :: Mul x y z => x -> y -> z
 (*) = undefined
 
+
+-----------
+-- Division
+-----------
+
+-- | Division and Remainder type-level relation
+--   Note it is not relational (i.e. its inverse cannot be used 
+--   for multiplication). 
+class (Nat x, Pos y) =>  DivMod x y q r | x y -> q r, q r y -> x, q r x -> y
+instance (Pos y, Compare x y cmp, DivMod' x y q r cmp) => DivMod x y q r
+
+class (Nat x, Pos y) => DivMod' x y q r cmp | x y cmp -> q r, 
+                                              q r cmp y -> x,
+                                              q r cmp x -> y 
+instance (Nat x, Pos y) => DivMod' x y D0 x  CLT
+instance (Nat x, Pos y) => DivMod' x y D1 D0 CEQ
+instance (Nat x, Pos y, Sub x y x', Pred q q', DivMod x' y q' r) 
+  => DivMod' x y q r CGT
+
+-- | value-level reflection function for the DivMod type-level relation
+divMod :: DivMod x y q r => x -> y -> (q,r)
+divMod _ _ = (undefined, undefined)
+
 -- | Division type-level relation
---  FIXME: Broken! (due to multiplication not being relational)
+--   Note it is not relational (due to DivMod not being relational)
 class Div x y z | x y -> z, x z -> y, y z -> x
-instance (Mul x y z) => Div z y x
+instance (DivMod x y q r) => Div x y q
 
 -- | value-level reflection function for the division type-level relation 
 div :: Div x y z => x -> y -> z
 div = undefined
 
+
+----------------------------------------
+-- Multiplication/Division special cases
+----------------------------------------
+
+-- | Multiplication by 10 type-level relation (based on DivMod10)
+class (Nat x, Nat q) => Mul10 x q | x -> q, q -> x
+instance DivMod10 x q D0 => Mul10 q x
+
+-- | value-level reflection function for Mul10 
+mul10 :: Mul10 x q => x -> q
+mul10 = undefined
+
+-- | Division by 10 and Remainer type-level relation
+--   This operation is much faster than DivMod. Furthermore, it is 
+--   the general, non-structural, constructor/deconstructor since it
+--   splits a decimal numeral into its initial and last digits.
+--   Thus, it allows to inspect the structure of a number and is normally
+--   used to create type-level operations.
+--
+--   Note that contrary to DivMod, DivMod10 is relational (it can be used to
+--   multiply by 10)
+class (Nat i, Nat x) => DivMod10 x i l | i l -> x, x -> i l
+instance DivMod10 D0 D0 D0
+instance DivMod10 D1 D0 D1
+instance DivMod10 D2 D0 D2
+instance DivMod10 D3 D0 D3
+instance DivMod10 D4 D0 D4
+instance DivMod10 D5 D0 D5
+instance DivMod10 D6 D0 D6
+instance DivMod10 D7 D0 D7
+instance DivMod10 D8 D0 D8
+instance DivMod10 D9 D0 D9
+instance (Nat (D1 :* l)) => DivMod10 (D1 :* l) D1 l  
+instance (Nat (D2 :* l)) => DivMod10 (D2 :* l) D2 l  
+instance (Nat (D3 :* l)) => DivMod10 (D3 :* l) D3 l  
+instance (Nat (D4 :* l)) => DivMod10 (D4 :* l) D4 l  
+instance (Nat (D5 :* l)) => DivMod10 (D5 :* l) D5 l  
+instance (Nat (D6 :* l)) => DivMod10 (D6 :* l) D6 l 
+instance (Nat (D7 :* l)) => DivMod10 (D7 :* l) D7 l  
+instance (Nat (D8 :* l)) => DivMod10 (D8 :* l) D8 l  
+instance (Nat (D9 :* l)) => DivMod10 (D9 :* l) D9 l  
+instance (Nat (x :* l), Nat ((x :* l) :* l')) => 
+  DivMod10 ((x :* l) :* l') (x :* l) l' 
+
+-- | value-level reflection function for DivMod10 
+divMod10 :: DivMod10 x q r => x -> (q,r)
+divMod10 _ = (undefined, undefined)
+
+
+-- | Division by 10 type-level relation (based on DivMod10)
+class (Nat x, Nat q) => Div10 x q | x -> q, q -> x
+instance DivMod10 x q r => Div10 x q
+
+-- | value-level reflection function for Mul10 
+div10 :: Div10 x q => x -> q
+div10 = undefined
+
+-----------------------------------
+-- Base-10 Exponentiation/Logarithm
+-----------------------------------
+
+-- | Base-10 Exponentiation type-level relation
+class (Nat x, Pos y) => Exp10 x y | x -> y, y -> x
+instance Exp10 D0 D1
+instance Exp10 D1 (D1 :* D0)
+instance Exp10 D2 (D1 :* D0 :* D0)
+instance Exp10 D3 (D1 :* D0 :* D0 :* D0)
+instance Exp10 D4 (D1 :* D0 :* D0 :* D0 :* D0)
+instance Exp10 D5 (D1 :* D0 :* D0 :* D0 :* D0 :* D0)
+instance Exp10 D6 (D1 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0)
+instance Exp10 D7 (D1 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0)
+instance Exp10 D8 (D1 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0)
+instance Exp10 D9 (D1 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0)
+instance (Pred (xi :* xl) x', 
+          Exp10 x' (y :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0))
+      => Exp10 (xi :* xl) 
+               (y :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0 :* D0)
+
+-- | value-level reflection function for Exp10
+exp10 :: Exp10 x y => x -> y
+exp10 = undefined
+
+-- | Base-10 logarithm type-level relation
+class (Pos x, Nat y) => Log10 x y | x -> y, y -> x
+instance Exp10 x y => Log10 y x
+
+-- | value-level reflection function for Log10
+log10 :: Log10 x y => x -> y
+log10 = undefined
 
 -------------
 -- Comparison
@@ -586,44 +722,29 @@ instance (Max' y x b z, Compare x y b) => Min x y z
 min :: Min x y z => x -> y -> z
 min = undefined
 
+-------
+-- GCD
+-------
+
+-- | Greatest Common Divisor type-level relation
+class (Nat x, Nat y, Nat gcd) => GCD x y gcd | x y -> gcd
+instance (Nat x, Nat y, Compare x y cmp, NClassify y cl, GCD' x y cl cmp gcd)
+   => GCD x y gcd
+
+-- Euclidean algorithm 
+class (Nat x, Nat y, Nat gcd) => GCD' x y cl cmp gcd | x y cmp cl -> gcd
+instance Nat x => GCD' x D0 Z cmp D0
+instance (Nat x, Nat y, GCD y x gcd) => GCD' x y P CLT gcd
+instance Nat x => GCD' x x  P CEQ x
+instance (Nat x, Nat y, Sub x y x', GCD x' y gcd) => GCD' x y P CGT gcd
+
+-- | value-level reflection function for the GCD type-level relation
+gcd :: GCD x y z => x -> y -> z
+gcd = undefined
 
 ---------------------
 -- Internal functions
 ---------------------
-
--- multiply by 10
-class (Nat x, Nat y) => Mul10 x y | x -> y, y -> x
-instance DivMod10 x D0 z => Mul10 x z
-
--- Spliting a decimal numeral into its initial digits and last digit
--- DivMod10 i l x 
--- it splits a decimal numeral x in two parts (i and l)
---  i = x `div` 10 (init, all digits but the last one)
---  l = x `mod` 10 (last, last digit)
--- Essentially, this is the general, non-structural, constructor/deconstructor
-class (Nat i, Nat x) => DivMod10 i l x | i l -> x, x -> i l
-
-instance DivMod10 D0 D0 D0
-instance DivMod10 D0 D1 D1
-instance DivMod10 D0 D2 D2
-instance DivMod10 D0 D3 D3
-instance DivMod10 D0 D4 D4
-instance DivMod10 D0 D5 D5
-instance DivMod10 D0 D6 D6
-instance DivMod10 D0 D7 D7
-instance DivMod10 D0 D8 D8
-instance DivMod10 D0 D9 D9
-instance (Nat (D1 :* l)) => DivMod10 D1 l  (D1 :* l)
-instance (Nat (D2 :* l)) => DivMod10 D2 l  (D2 :* l)
-instance (Nat (D3 :* l)) => DivMod10 D3 l  (D3 :* l)
-instance (Nat (D4 :* l)) => DivMod10 D4 l  (D4 :* l)
-instance (Nat (D5 :* l)) => DivMod10 D5 l  (D5 :* l)
-instance (Nat (D6 :* l)) => DivMod10 D6 l  (D6 :* l)
-instance (Nat (D7 :* l)) => DivMod10 D7 l  (D7 :* l)
-instance (Nat (D8 :* l)) => DivMod10 D8 l  (D8 :* l)
-instance (Nat (D9 :* l)) => DivMod10 D9 l  (D9 :* l)
-instance (Nat (x :* l), Nat ((x :* l) :* l')) => 
-  DivMod10 (x :* l) l' ((x :* l) :* l')
 
 -- classify a natural as positive or zero
 data Z
