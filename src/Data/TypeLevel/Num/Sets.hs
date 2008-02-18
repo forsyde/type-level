@@ -34,8 +34,6 @@ class NatI n where
 -- | Reflecting function
  toNum :: Num a => n -> a -- Reflection function
 
-instance NatI n => Show n where
- show = show.toNum
 
 -- | Less generic reflecting function (Int)
 toInt :: Nat n => n -> Int

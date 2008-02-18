@@ -1,4 +1,5 @@
-{-# LANGUAGE EmptyDataDecls, TypeOperators, DeriveDataTypeable #-}
+{-# LANGUAGE EmptyDataDecls, TypeOperators, DeriveDataTypeable,
+             ScopedTypeVariables #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.TypeLevel.Num.Reps
@@ -38,27 +39,38 @@ import Data.Generics (Typeable)
 
 -- | Decimal digit zero
 data D0 deriving Typeable
+instance Show D0 where show _ = "0"
 -- | Decimal digit one
 data D1 deriving Typeable
+instance Show D1 where show _ = "1"
 -- | Decimal digit two
 data D2 deriving Typeable
+instance Show D2 where show _ = "2"
 -- | Decimal digit three 
 data D3 deriving Typeable
+instance Show D3 where show _ = "3"
 -- | Decimal digit four 
 data D4 deriving Typeable
+instance Show D4 where show _ = "4"
 -- | Decimal digit five
 data D5 deriving Typeable
+instance Show D5 where show _ = "5"
 -- | Decimal digit six
 data D6 deriving Typeable
+instance Show D6 where show _ = "6"
 -- | Decimal digit seven
 data D7 deriving Typeable
+instance Show D7 where show _ = "7"
 -- | Decimal digit eight
 data D8 deriving Typeable
+instance Show D8 where show _ = "8"
 -- | Decimal digit nine
 data D9 deriving Typeable
+instance Show D9 where show _ = "9"
 
 -- | Connective to glue digits together.
 --   For example, @D1 :* D0 :* D0@ represents the decimal number 100
 data a :* b = a :* b deriving Typeable
-
-
+instance (Show a, Show b) => Show (a :* b)
+  where show _ = (show (undefined :: a)) ++ 
+                 (show (undefined :: b))
