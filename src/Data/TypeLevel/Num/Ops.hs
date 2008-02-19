@@ -25,6 +25,7 @@ module Data.TypeLevel.Num.Ops
   -- * Multiplication/Division
   Mul, (*),
   Div, div,
+  Mod, mod,
   DivMod, divMod,
   -- ** Special efficiency cases
   Mul10, mul10,
@@ -51,7 +52,7 @@ module Data.TypeLevel.Num.Ops
 import Data.TypeLevel.Num.Reps
 import Data.TypeLevel.Num.Sets
 import Prelude hiding 
- (succ, pred, (+), (-), (*), div, divMod,
+ (succ, pred, (+), (-), (*), div, mod, divMod,
   (==), (>), (<), (<), (>=), (<=), max, min, gcd)
 
 -------------------------
@@ -392,6 +393,14 @@ instance (DivMod x y q r) => Div x y q
 -- | value-level reflection function for the division type-level relation 
 div :: Div x y z => x -> y -> z
 div = undefined
+
+-- | Remainder of division, type-level relation
+class Mod x y r | x y -> r
+instance DivMod x y q r => Mod x y r
+
+-- | value-level reflection function for the division type-level relation 
+mod :: Mod x y r => x -> y -> r
+mod = undefined
 
 
 ----------------------------------------
