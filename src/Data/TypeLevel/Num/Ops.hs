@@ -33,7 +33,7 @@ module Data.TypeLevel.Num.Ops
   DivMod10, divMod10,
   -- * Base-10 Exponentiation/Logarithm
   Exp10, exp10,
-  Log10, log10,
+  Log10, log10, Log10',
   -- * Comparison assertions
   -- ** General comparison assertion
   Compare, cmp,
@@ -492,6 +492,24 @@ instance Exp10 x y => Log10 y x
 -- | value-level reflection function for Log10
 log10 :: Log10 x y => x -> y
 log10 = undefined
+
+{- Log10': Alternative implementation of Log10
+
+Not relational, but works for all Positive values (not only results of Exp10),
+and is actually implemented as the digit-length of the numeral, which can
+could be useful. However Log10' is not exported -}
+
+class (Pos x, Nat y) => Log10' x y | x -> y
+instance Log10' D1 D1
+instance Log10' D2 D1
+instance Log10' D3 D1
+instance Log10' D4 D1
+instance Log10' D5 D1
+instance Log10' D6 D1
+instance Log10' D7 D1
+instance Log10' D8 D1
+instance Log10' D9 D1
+instance (Pos (xi :* xl), Pred y y', Log10' xi y') => Log10' (xi :* xl) y
 
 -------------
 -- Comparison
