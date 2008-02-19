@@ -33,7 +33,7 @@ module Data.TypeLevel.Num.Ops
   DivMod10, divMod10,
   -- * Base-10 Exponentiation/Logarithm
   Exp10, exp10,
-  Log10, log10, Log10',
+  Log10, log10,
   -- * Comparison assertions
   -- ** General comparison assertion
   Compare, cmp,
