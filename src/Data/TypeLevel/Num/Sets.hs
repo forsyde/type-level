@@ -32,8 +32,8 @@ import Data.TypeLevel.Num.Reps
 
 -- | Naturals (Positives without zero), internal version
 class NatI n where 
--- | Reflecting function
- toNum :: Num a => n -> a -- Reflection function
+ -- | Reflecting function
+ toNum :: Num a => n -> a
 
 
 -- | Less generic reflecting function (Int)
