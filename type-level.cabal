@@ -40,6 +40,6 @@ Library
                    Data.TypeLevel.Num.Reps,
                    Data.TypeLevel.Num.Aliases,
                    Data.TypeLevel.Num.Sets,
-                   Data.TypeLevel.Num.Ops
-  other-modules:   Data.TypeLevel.Num.Aliases.TH
+                   Data.TypeLevel.Num.Ops,
+                   Data.TypeLevel.Num.Aliases.TH
   ghc-options:	-Wall -O2

@@ -14,7 +14,7 @@
 -- Internal template haskell functions to generate type-level numeral aliases
 -- 
 ----------------------------------------------------------------------------
-module Data.TypeLevel.Num.Aliases.TH (genAliases) where
+module Data.TypeLevel.Num.Aliases.TH (genAliases, dec2TypeLevel) where
 
 import Language.Haskell.TH
 
@@ -81,7 +81,7 @@ genAliases' nb no nd nh curr
 
 -- | Generate the type-level decimal representation for a value-level 
 --   natural number. 
--- NOTE: Uhm, this function could be useful by itself avoiding to generate 
+-- NOTE: This function could be useful by itself avoiding to generate 
 -- aliases. However, type-splicing is not yet supported by template haskell.
 dec2TypeLevel :: Int -> Q Type
 dec2TypeLevel n
