@@ -30,7 +30,7 @@ import Data.TypeLevel.Num.Reps
 -- These classes are internal, denoted by the ending "I", which is removed in 
 -- the exported proxies (read below)
 
--- | Naturals (Positives without zero), internal version
+-- | Naturals (Positives and zero), internal version
 class NatI n where 
  -- | Reflecting function
  toNum :: Num a => n -> a
@@ -55,7 +55,7 @@ class NatI n => PosI n
 -- Besides, because the following proxy instances are most general,
 -- one may not add further instances without overlapping instance extension.
 
--- | Naturals (Positives without zero)
+-- | Naturals (Positives and zero)
 class    NatI n => Nat n
 instance NatI n => Nat n
 
