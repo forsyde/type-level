@@ -13,6 +13,8 @@
 -- of the type-level library.
 -- 
 -----------------------------------------------------------------------------
-module Data.TypeLevel (module Data.TypeLevel.Num) where
+module Data.TypeLevel (module Data.TypeLevel.Num, 
+                       module Data.TypeLevel.Bool) where
 
 import Data.TypeLevel.Num
+import Data.TypeLevel.Bool
