@@ -1,5 +1,5 @@
 {-# LANGUAGE EmptyDataDecls, TypeOperators, DeriveDataTypeable,
-             ScopedTypeVariables #-}
+             ScopedTypeVariables, TemplateHaskell #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.TypeLevel.Num.Reps
@@ -24,7 +24,8 @@ module Data.TypeLevel.Num.Reps (
  (:*)(..),
  ) where
 
-import Data.Generics (Typeable)
+import Data.Typeable (Typeable)
+import Language.Haskell.TH.Syntax (Lift(..)) 
 
 -------------------------
 -- Decimal Representation
@@ -40,37 +41,50 @@ import Data.Generics (Typeable)
 -- | Decimal digit zero
 data D0 deriving Typeable
 instance Show D0 where show _ = "0"
+instance Lift D0 where lift _ = [| undefined :: D0 |]
 -- | Decimal digit one
 data D1 deriving Typeable
 instance Show D1 where show _ = "1"
+instance Lift D1 where lift _ = [| undefined :: D1 |]
 -- | Decimal digit two
 data D2 deriving Typeable
 instance Show D2 where show _ = "2"
+instance Lift D2 where lift _ = [| undefined :: D2 |]
 -- | Decimal digit three 
 data D3 deriving Typeable
 instance Show D3 where show _ = "3"
+instance Lift D3 where lift _ = [| undefined :: D3 |]
 -- | Decimal digit four 
 data D4 deriving Typeable
 instance Show D4 where show _ = "4"
+instance Lift D4 where lift _ = [| undefined :: D4 |]
 -- | Decimal digit five
 data D5 deriving Typeable
 instance Show D5 where show _ = "5"
+instance Lift D5 where lift _ = [| undefined :: D5 |]
 -- | Decimal digit six
 data D6 deriving Typeable
+instance Lift D6 where lift _ = [| undefined :: D6 |]
 instance Show D6 where show _ = "6"
 -- | Decimal digit seven
 data D7 deriving Typeable
 instance Show D7 where show _ = "7"
+instance Lift D7 where lift _ = [| undefined :: D7 |]
 -- | Decimal digit eight
 data D8 deriving Typeable
 instance Show D8 where show _ = "8"
+instance Lift D8 where lift _ = [| undefined :: D8 |]
 -- | Decimal digit nine
 data D9 deriving Typeable
 instance Show D9 where show _ = "9"
+instance Lift D9 where lift _ = [| undefined :: D9 |]
 
 -- | Connective to glue digits together.
 --   For example, @D1 :* D0 :* D0@ represents the decimal number 100
 data a :* b = a :* b deriving Typeable
-instance (Show a, Show b) => Show (a :* b)
-  where show _ = (show (undefined :: a)) ++ 
-                 (show (undefined :: b))
+
+instance (Show a, Show b) => Show (a :* b) where
+  show _ = (show (undefined :: a)) ++ (show (undefined :: b))
+
+instance (Lift a, Lift b) => Lift (a :* b) where
+  lift _ = [| $(lift (undefined ::a)) :* $(lift (undefined :: b) ) |]
