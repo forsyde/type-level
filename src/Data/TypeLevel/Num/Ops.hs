@@ -27,18 +27,24 @@ module Data.TypeLevel.Num.Ops
   Div, div,
   Mod, mod,
   DivMod, divMod,
+  IsDivBy, isDivBy,
   -- ** Special efficiency cases
   Mul10, mul10,
   Div10, div10,
   DivMod10, divMod10,
-  -- * Base-10 Exponentiation/Logarithm
+  -- * Exponientiation/Logarithm
+  ExpBase, (^),
+  LogBase, logBase,
+  LogBaseF, logBaseF,
+  IsPowOf, isPowOf,
+  -- ** Special efficiency cases
   Exp10, exp10,
   Log10, log10,
   -- * Comparison assertions
   -- ** General comparison assertion
-  Compare, cmp,
+  Trich, trich,
   -- *** Type-level values denoting comparison results
-  CLT, CEQ, CGT,
+  LT, EQ, GT,
   -- ** Abbreviated comparison assertions
   (:==:), (:>:), (:<:), (:>=:), (:<=:),
   (==)  , (>)  , (<)  , (>=)  , (<=), 
@@ -51,23 +57,26 @@ module Data.TypeLevel.Num.Ops
 
 import Data.TypeLevel.Num.Reps
 import Data.TypeLevel.Num.Sets
+import Data.TypeLevel.Bool
+
 import Prelude hiding 
- (succ, pred, (+), (-), (*), div, mod, divMod,
-  (==), (>), (<), (<), (>=), (<=), max, min, gcd)
+ (succ, pred, (+), (-), (*), div, mod, divMod, (^), logBase,
+  (==), (>), (<), (<), (>=), (<=), max, min, gcd, Bool)
 
 -------------------------
 -- Successor, Predecessor
 -------------------------
 
--- | Successor type-level relation
+-- | Successor type-level relation. @Succ x y@ establishes
+--  that @succ x = y@.
 class (Nat x, Pos y) => Succ x y | x -> y, y -> x
 
 
-instance (Pos y, NClassify y yc, DivMod10 x xi xl, Succ' xi xl yi yl yc,
+instance (Pos y, IsZero y yz, DivMod10 x xi xl, Succ' xi xl yi yl yz,
          DivMod10 y yi yl)
    => Succ x y
 
-class Succ' xh xl yh yl yc | xh xl -> yh yl yc, yh yl yc -> xh xl
+class Succ' xh xl yh yl yz | xh xl -> yh yl yz, yh yl yz -> xh xl
 
 
 -- This intends to implement a user reporting operation when
@@ -78,17 +87,17 @@ class Failure t
 -- No instances
 data PredecessorOfZeroError t
  
-instance Failure (PredecessorOfZeroError x) => Succ' (x,x) (x,x) D0 D0 Z
-instance Succ' xi D0 xi D1 P
-instance Succ' xi D1 xi D2 P
-instance Succ' xi D2 xi D3 P
-instance Succ' xi D3 xi D4 P
-instance Succ' xi D4 xi D5 P
-instance Succ' xi D5 xi D6 P
-instance Succ' xi D6 xi D7 P
-instance Succ' xi D7 xi D8 P
-instance Succ' xi D8 xi D9 P
-instance Succ xi yi => Succ' xi D9 yi D0 P
+instance Failure (PredecessorOfZeroError x) => Succ' (x,x) (x,x) D0 D0 True
+instance Succ' xi D0 xi D1 False
+instance Succ' xi D1 xi D2 False
+instance Succ' xi D2 xi D3 False
+instance Succ' xi D3 xi D4 False
+instance Succ' xi D4 xi D5 False
+instance Succ' xi D5 xi D6 False
+instance Succ' xi D6 xi D7 False
+instance Succ' xi D7 xi D8 False
+instance Succ' xi D8 xi D9 False
+instance Succ xi yi => Succ' xi D9 yi D0 False
 
 
 {-
@@ -124,17 +133,17 @@ class (Nat x, Pos y) => Succ x y | x -> y, y -> x
 instance Succ' x y => Succ x y
 -}
 
--- | value-level reflection function for the succesor type-level relation
+-- | value-level reflection function for the 'Succ' type-level relation
 succ :: Succ x y => x -> y
 succ = undefined
 
 -- Note: maybe redundant 
--- | Predecessor type-level relation
+-- | Predecessor type-level relation. @Pred x y@ establishes
+--  that @pred x = y@.
 class (Pos x, Nat y) => Pred x y | x -> y, y -> x
 instance Succ x y => Pred y x
 
--- | value-level reflection function for the predecessor type-level relation
---   (named succRef to avoid a clash with 'Prelude.pred')
+-- | value-level reflection function for the 'Pred' type-level relation
 pred :: Pred x y => x -> y
 pred = undefined
 
@@ -160,68 +169,26 @@ instance (Succ z z', Add' D7 y z) => Add' D8 y z'
 instance (Succ z z', Add' D8 y z) => Add' D9 y z'
 -- multidigit addition
 -- TODO: explain
-instance (Pos (xi :* xl), Nat z, Add' xi yi zi, DivMod10 y yi yl, Add' xl (zi :* yl) z)
+instance (Pos (xi :* xl), Nat z,
+          Add' xi yi zi, DivMod10 y yi yl, Add' xl (zi :* yl) z)
     => Add' (xi :* xl) y z
-{-
-The rule above can be extended to:
 
-instance (Pos x, Pos (zi :* yl), Add' x yi zi, DivMod10 y yi yl)
-    => Add' (x :* D0) y (zi :* yl)
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Succ (zi :* yl) z)
-    => Add' (x :* D1) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D2 (zi :* yl) z)
-    => Add' (x :* D2) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D3 (zi :* yl) z)
-    => Add' (x :* D3) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D4 (zi :* yl) z)
-    => Add' (x :* D4) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D5 (zi :* yl) z)
-    => Add' (x :* D5) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D6 (zi :* yl) z)
-    => Add' (x :* D6) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D7 (zi :* yl) z)
-    => Add' (x :* D7) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D8 (zi :* yl) z)
-    => Add' (x :* D8) y z
-instance (Pos x, Nat z, Add' x yi zi, DivMod10 y yi yl, Add' D9 (zi :* yl) z)
-    => Add' (x :* D9) y z
--}
-
-{-
-
--- Nicer (but not relational) multidigit addition. 
-
--- The algortihm follows the one used when 
--- "using pen and paper", not relational :S
--- e.g. 
---   4567
---  +9345      4567 + 9345 =  ((5 + 7) mod 10) + 
---   ----                     ( ((5 + 7) div 10) + (456 + 934) ) * 10  
---  13912 
-instance (Pos (xi :* xl),           -- decompose first arg
-          Nat y, DivMod10 y yi yl, -- decompose second arg
-          Pos (zi' :* fl),
-          Add' xl yl f,            -- Add the first two digits of x and y
-          DivMod10 f fi fl,        -- Obtain carryout of the previous sum
-          Add' xi yi zi,           -- Add the other digits and the carryout 
-          Add' zi fi zi') 
-  => Add' (xi :* xl) y (zi' :* fl)  
--}
-
--- | Addition type-level relation
+-- | Addition type-level relation.  @Add x y z@ establishes
+--  that @x + y = z@.
 class (Add' x y z, Add' y x z) => Add x y z | x y -> z, z x -> y, z y -> x
 instance (Add' x y z, Add' y x z) => Add x y z
 
 
--- | value-level reflection function for the addition type-level relation 
+-- | value-level reflection function for the 'Add' type-level relation 
 (+) :: (Add x y z) => x -> y -> z
 (+) = undefined
 
--- | Subtraction type-level relation
+-- | Subtraction type-level relation. @Sub x y z@ establishes
+--  that @x - y = z@ 
 class Sub x y z | x y -> z, z x -> y, z y -> x
 instance Add x y z => Sub z y x
 
--- | value-level reflection function for the addition type-level relation 
+-- | value-level reflection function for the 'Sub' type-level relation 
 (-) :: (Sub x y z) => x -> y -> z
 (-) = undefined
 
@@ -233,12 +200,17 @@ instance Add x y z => Sub z y x
 -- Multiplication
 -----------------
 
-class (Nat x, Nat y, Nat z) => Mul' x y z | x y -> z, x z -> y
+-- | Multiplication type-level relation. @Mul x y z@ establishes
+--  that @x * y = z@.
+--   Note it isn't relational (i.e. its inverse cannot be used for division,
+--   however, even if it could, the resulting division would only
+--   work for zero-remainder divisions)
+class (Nat x, Nat y, Nat z) => Mul x y z | x y -> z
 
 -- By structural induction on the first argument
-instance Nat y => Mul' D0 y D0
-instance Nat y => Mul' D1 y y
-instance Add y y z => Mul' D2 y z
+instance Nat y => Mul D0 y D0
+instance Nat y => Mul D1 y y
+instance Add y y z => Mul D2 y z
 -- IMPORTANT: changing the line above by the commented line below
 --            would make multiplication relational. However, that would
 --            happen at the cost of performing a division by 2 in every 
@@ -246,117 +218,18 @@ instance Add y y z => Mul' D2 y z
 --            Besides, the Division algortihm obtained out of the 
 --            inverse of Mul can only work when the remainder is zero, 
 --            which isn't really useful.
--- instance (Add y y z, DivMod z D2 y D0) => Mul' D2 y z
-instance (Add z y z', Mul' D2 y z) => Mul' D3 y z'
-instance (Add z y z', Mul' D3 y z) => Mul' D4 y z'
-instance (Add z y z', Mul' D4 y z) => Mul' D5 y z'
-instance (Add z y z', Mul' D5 y z) => Mul' D6 y z'
-instance (Add z y z', Mul' D6 y z) => Mul' D7 y z'
-instance (Add z y z', Mul' D7 y z) => Mul' D8 y z'
-instance (Add z y z', Mul' D8 y z) => Mul' D9 y z'
+-- instance (Add y y z, DivMod z D2 y D0) => Mul D2 y z
+instance (Add z y z', Mul D2 y z) => Mul D3 y z'
+instance (Add z y z', Mul D3 y z) => Mul D4 y z'
+instance (Add z y z', Mul D4 y z) => Mul D5 y z'
+instance (Add z y z', Mul D5 y z) => Mul D6 y z'
+instance (Add z y z', Mul D6 y z) => Mul D7 y z'
+instance (Add z y z', Mul D7 y z) => Mul D8 y z'
+instance (Add z y z', Mul D8 y z) => Mul D9 y z'
 -- TODO explain.
-instance (Pos (xi :* xl), Nat y, Mul' xi y z, Mul10 z z10, Mul' xl y dy, 
-          Add dy z10 z')  => Mul' (xi :* xl) y z'
+instance (Pos (xi :* xl), Nat y, Mul xi y z, Mul10 z z10, Mul xl y dy, 
+          Add dy z10 z')  => Mul (xi :* xl) y z'
 
-
-
-{-
-
-Extended version of the rule above
-instance (Pos x, Nat y, Nat z', Mul' x y z, Mul10 z z')  => Mul' (x :* D0) y z'
-instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Add y z10 z') 
-  => Mul' (x :* D1) y z'
-instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Add y y dy, Add dy z10 z') 
-  => Mul' (x :* D2) y z'
-instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D3 y dy, Add dy z10 z') 
-  => Mul' (x :* D3) y z'
-instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D4 y dy, Add dy z10 z') 
-  => Mul' (x :* D4) y z'
-instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D5 y dy, Add dy z10 z') 
-  => Mul' (x :* D5) y z'
-instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D6 y dy, Add dy z10 z') 
-  => Mul' (x :* D6) y z'
-instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D7 y dy, Add dy z10 z') 
-  => Mul' (x :* D7) y z'
-instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D8 y dy, Add dy z10 z') 
-  => Mul' (x :* D8) y z'
-instance (Pos x, Nat y, Mul' x y z, Mul10 z z10, Mul' D9 y dy, Add dy z10 z') 
-  => Mul' (x :* D9) y z'
--}
-
-{-
--- Nice (but not relational) multidigit multiplication
-
--- FIXME: not being relational breaks division!
---
--- The algorithm follows the one used with pen-and-paper
--- e.g. 
---   4567
---  x  45      4567 * 45 =  (5 * 4567)  + (4 * 4567) * 10 
---   ----                     
---  22835
--- 18268
--- ------
--- 205515
-
-instance (Pos (xi :* xl), -- Decompose the first arg (multiplier) 
-          Nat y,  -- Multiplicand
-          Mul' xl y fr, -- Multiply using the last digit of the multiplier
-                        -- obtaining the first row
-          Mul' xi y rr, -- Multiply the rest.
-          Mul10 rr rr',   
-          Add  fr rr' z -- Add the rows.
-   ) => Mul' (xi :* xl) y z
--}
-
-
-
-{-
-
-Note: I started to port this relational multidigit multiplication
-      code from Oleg's Binary implementation but is really confusing.
-
--- We assert that x * y = z, with x > 0
-class (Pos x, Nat y, Nat z) => Mul' x y z | x y -> z, x z -> y
-
--- by structural induction on the first argument
-instance Nat y => Mul' D1 y y
-instance (Mul' x y zh, DivMod10 z zh D0) => Mul' (x :* D0) y z
-
-instance (Mul'F x y z,  Mul'B x y z) => Mul' (x :* D1) y z
-
--- We assert that (2x+1) * y = z with x > 0
-class (Pos x, Nat y, Nat z) => Mul'F x y z | x y -> z
-
-instance Pos x => Mul'F x D0 D0
-instance Pos x => Mul'F x D1 (x :* D1)
-
--- (2x+1) * 2y
-instance (Mul'F x y z, Pos x, Pos y, Pos z) => Mul'F x (y :* D0) (z :* D0)
-
--- (2x+1) * (2y+1) = 2*( (2x+1)*y + x ) + 1, y > 0
-instance (Mul'F x y z', Add x z' z, Pos x, Pos y, Pos z) 
-    => Mul'F x (y :* D1) (z :* D1)
-
--- We assert that (2x+1) * y = z with x > 0
--- The functional dependencies go the other way though
-class (Pos x, Nat y, Nat z) => Mul'B x y z | z x -> y
-instance Pos x => Mul'B x D0 D0
--- instance Pos x => Mul'B x y B1 -- cannot happen
-
--- (2x+1) * 2y
-instance (Mul'B x y z, Pos x, Pos y, Pos z) => Mul'B x (y :* D0) (z :* D0)
--- (2x+1) * (2y+1) = 2*( (2x+1)*y + x ) + 1, y >= 0
-instance (DivMod10 yt y D1, Mul'B x y z', Add x z' z, Pos x, Pos z) 
-    => Mul'B x yt (z :* D1)
--}
-
--- | Multiplication type-level relation
---   Note it isn't relational (i.e. its inverse cannot be used for division,
---   however, even if it could, the resulting division would only
---   work for zero-remainder divisions)
-class (Mul' x y z, Mul' y x z) => Mul x y z | x y -> z, x z -> y, y z -> x
-instance (Mul' x y z, Mul' y x z) => Mul x y z
 
 -- | value-level reflection function for the multiplication type-level relation 
 (*) :: Mul x y z => x -> y -> z
@@ -367,38 +240,40 @@ instance (Mul' x y z, Mul' y x z) => Mul x y z
 -- Division
 -----------
 
--- | Division and Remainder type-level relation
+-- | Division and Remainder type-level relation. @DivMod x y q r@ establishes
+--  that @x/y = q + r/y@
 --   Note it is not relational (i.e. its inverse cannot be used 
 --   for multiplication). 
-class (Nat x, Pos y) =>  DivMod x y q r | x y -> q r, q r y -> x, q r x -> y
-instance (Pos y, Compare x y cmp, DivMod' x y q r cmp) => DivMod x y q r
+class (Nat x, Pos y) =>  DivMod x y q r | x y -> q r
+instance (Pos y, Trich x y cmp, DivMod' x y q r cmp) => DivMod x y q r
 
 class (Nat x, Pos y) => DivMod' x y q r cmp | x y cmp -> q r, 
                                               q r cmp y -> x,
                                               q r cmp x -> y 
-instance (Nat x, Pos y) => DivMod' x y D0 x  CLT
-instance (Nat x, Pos y) => DivMod' x y D1 D0 CEQ
+instance (Nat x, Pos y) => DivMod' x y D0 x  LT
+instance (Nat x, Pos y) => DivMod' x y D1 D0 EQ
 instance (Nat x, Pos y, Sub x y x', Pred q q', DivMod x' y q' r) 
-  => DivMod' x y q r CGT
+  => DivMod' x y q r GT
 
--- | value-level reflection function for the DivMod type-level relation
+-- | value-level reflection function for the 'DivMod' type-level relation
 divMod :: DivMod x y q r => x -> y -> (q,r)
 divMod _ _ = (undefined, undefined)
 
--- | Division type-level relation
+-- | Division type-level relation. Remainder-discarding version of 'DivMod'. 
 --   Note it is not relational (due to DivMod not being relational)
 class Div x y z | x y -> z, x z -> y, y z -> x
 instance (DivMod x y q r) => Div x y q
 
--- | value-level reflection function for the division type-level relation 
+-- | value-level reflection function for the 'Div' type-level relation 
 div :: Div x y z => x -> y -> z
 div = undefined
 
--- | Remainder of division, type-level relation
+-- | Remainder of division, type-level relation. @Mod x y r@ establishes that
+--   @r@ is the reminder of dividing @x@ by @y@.
 class Mod x y r | x y -> r
 instance DivMod x y q r => Mod x y r
 
--- | value-level reflection function for the division type-level relation 
+-- | value-level reflection function for the 'Mod' type-level relation 
 mod :: Mod x y r => x -> y -> r
 mod = undefined
 
@@ -407,22 +282,24 @@ mod = undefined
 -- Multiplication/Division special cases
 ----------------------------------------
 
--- | Multiplication by 10 type-level relation (based on DivMod10)
+-- | Multiplication by 10 type-level relation (based on 'DivMod10').
+--   @Mul10 x y@ establishes that @10 * x = y@.
 class (Nat x, Nat q) => Mul10 x q | x -> q, q -> x
 instance DivMod10 x q D0 => Mul10 q x
 
--- | value-level reflection function for Mul10 
+-- | value-level reflection function for 'Mul10' 
 mul10 :: Mul10 x q => x -> q
 mul10 = undefined
 
--- | Division by 10 and Remainer type-level relation
+-- | Division by 10 and Remainer type-level relation (similar to 'DivMod'). 
+--
 --   This operation is much faster than DivMod. Furthermore, it is 
 --   the general, non-structural, constructor/deconstructor since it
---   splits a decimal numeral into its initial and last digits.
+--   splits a decimal numeral into its initial digits and last digit.
 --   Thus, it allows to inspect the structure of a number and is normally
 --   used to create type-level operations.
 --
---   Note that contrary to DivMod, DivMod10 is relational (it can be used to
+--   Note that contrary to 'DivMod', 'DivMod10' is relational (it can be used to
 --   multiply by 10)
 class (Nat i, Nat x) => DivMod10 x i l | i l -> x, x -> i l
 instance DivMod10 D0 D0 D0
@@ -460,6 +337,102 @@ instance DivMod10 x q r => Div10 x q
 div10 :: Div10 x q => x -> q
 div10 = undefined
 
+----------------------------
+-- Is-Divisible-By assertion
+----------------------------
+
+-- | Is-divisible-by type-level assertion. e.g @IsDivBy d x@ establishes that
+--   @x@ is divisible by @d@.
+class (Pos d, Nat x) => IsDivBy d x
+instance (DivMod x d q D0) => IsDivBy d x
+
+-- | value-level reflection function for IsDivBy
+isDivBy :: IsDivBy d x => d -> x
+isDivBy = undefined
+
+---------------------------
+-- Exponentiation/Logarithm
+---------------------------
+
+-- | Exponentation type-level relation. @ExpBase b e r@ establishes
+--  that @b^e = r@
+--  Note it is not relational (i.e. it cannot be used to express logarithms)
+class (Nat b, Nat e, Nat r) => ExpBase b e r | b e -> r
+
+-- structural induction over the exponent
+instance Nat b => ExpBase b D0 D1
+instance Nat b => ExpBase b D1 b
+instance (Mul b b r) => ExpBase b D2 r
+instance (Mul r b r', ExpBase b D2 r) => ExpBase b D3 r'
+instance (Mul r b r', ExpBase b D3 r) => ExpBase b D4 r'
+instance (Mul r b r', ExpBase b D4 r) => ExpBase b D5 r'
+instance (Mul r b r', ExpBase b D5 r) => ExpBase b D6 r'
+instance (Mul r b r', ExpBase b D6 r) => ExpBase b D7 r'
+instance (Mul r b r', ExpBase b D7 r) => ExpBase b D8 r'
+instance (Mul r b r', ExpBase b D8 r) => ExpBase b D9 r'
+instance (Nat b, Pos (ei :* el), Nat r, 
+          Mul b r r', Pred (ei :* el) e', ExpBase b e' r) 
+           => ExpBase b (ei :* el) r'
+-- | value-level reflection function for the ExpBase type-level relation
+(^) :: ExpBase b e r => b -> e -> r
+(^) = undefined
+
+
+-- Logarithm type-level relation. @LogBase b x e@ establishes that 
+-- @log_base_b x = e@
+--  Note it is not relational (i.e. cannot be used to express exponentiation)
+class (Pos b, b :>=: D2, Pos x, Nat e) =>  LogBase b x e  | b x -> e 
+instance  LogBaseF b x e f => LogBase b x e
+
+
+-- | value-level reflection function for LogBase
+logBase :: LogBaseF b x e f => b -> x -> e
+logBase = undefined 
+
+
+-- | Version of LogBase which also outputs if the logarithm
+-- calculated was exact.
+-- f indicates if the resulting logarithm has no fractional part (i.e.
+-- tells if the result provided is exact)
+class (Pos b, b :>=: D2, Pos x, Nat e, Bool f) 
+     =>  LogBaseF b x e f | b x -> e f
+instance (Trich x b cmp, LogBaseF' b x e f cmp) => LogBaseF b x e f
+
+class (Pos b, b :>=: D2, Pos x, Nat e, Bool f)
+     => LogBaseF' b x e f cmp | b x cmp -> e f 
+instance (Pos b, b :>=: D2, Pos x) => LogBaseF' b x D0 False LT
+instance (Pos b, b :>=: D2) => LogBaseF' b b D1 True  EQ
+instance (Pos b, b :>=: D2, Pos x, DivMod x b q r, IsZero r rz, And rz f' f, 
+          Pred e e', LogBaseF b q e' f') => LogBaseF' b x e f GT
+
+-- | value-level reflection function for LogBaseF
+logBaseF :: LogBaseF b x e f => b -> x -> (e,f)
+logBaseF _ _ = (undefined, undefined) 
+
+
+-- We could reuse LogBaseF for IsPowOf but it would be inneficient.
+-- LogBaseF continues calculating the logarithm even if after knowing its
+-- not exact. Thus, it is desirable to include a custom definition of
+-- IsPowOf which can "abort" the calculation forcing the Divisions to be
+-- exact
+
+
+-- | Assert that a number (@x@) can be expressed as the power of another one
+--   (@b@) (i.e. the fractional part of @log_base_b x = 0@, or, 
+--   in a different way, @exists y . b\^y = x@). 
+class (Pos b, b :>=: D2, Pos x) =>  IsPowOf b x
+instance (Trich x b cmp, IsPowOf' b x cmp) => IsPowOf b x
+
+class (Pos b, b :>=: D2, Pos x) => IsPowOf' b x cmp
+-- If lower (x < b), then the logarithm is not exact  
+-- instance (Pos b, b :>=: D2, Pos x) => IsPowOf' b x LT
+instance (Pos b, b :>=: D2) => IsPowOf' b b EQ
+instance (Pos b, b :>=: D2, Pos x, DivMod x b q D0, IsPowOf b q) 
+         => IsPowOf' b x  GT
+-- | 
+isPowOf :: IsPowOf b x => b -> x -> ()
+isPowOf = undefined
+
 -----------------------------------
 -- Base-10 Exponentiation/Logarithm
 -----------------------------------
@@ -486,30 +459,32 @@ exp10 :: Exp10 x y => x -> y
 exp10 = undefined
 
 -- | Base-10 logarithm type-level relation
-class (Pos x, Nat y) => Log10 x y | x -> y, y -> x
-instance Exp10 x y => Log10 y x
+--   Note it is not relational (cannot be used to express Exponentation to 10)
+--   However, it works with any positive numeral (not just powers of 10)
+class (Pos x, Nat y) => Log10 x y | x -> y
+instance Log10 D1 D0
+instance Log10 D2 D0
+instance Log10 D3 D0
+instance Log10 D4 D0
+instance Log10 D5 D0
+instance Log10 D6 D0
+instance Log10 D7 D0
+instance Log10 D8 D0
+instance Log10 D9 D0
+instance (Pos (xi :* xl), Pred y y', Log10 xi y') => Log10 (xi :* xl) y
 
--- | value-level reflection function for Log10
+-- | value-level reflection function for 'Log10'
 log10 :: Log10 x y => x -> y
 log10 = undefined
 
 {- Log10': Alternative implementation of Log10
 
-Not relational, but works for all Positive values (not only results of Exp10),
-and is actually implemented as the digit-length of the numeral, which can
-could be useful. However Log10' is not exported -}
+Relational, but it only works for results of Exp10 (i.e. powers of 10).
 
-class (Pos x, Nat y) => Log10' x y | x -> y
-instance Log10' D1 D1
-instance Log10' D2 D1
-instance Log10' D3 D1
-instance Log10' D4 D1
-instance Log10' D5 D1
-instance Log10' D6 D1
-instance Log10' D7 D1
-instance Log10' D8 D1
-instance Log10' D9 D1
-instance (Pos (xi :* xl), Pred y y', Log10' xi y') => Log10' (xi :* xl) y
+class (Pos x, Nat y) => Log10' x y | x -> y, y -> x
+instance Exp10 x y => Log10' y x
+-}
+
 
 -------------
 -- Comparison
@@ -518,208 +493,211 @@ instance (Pos (xi :* xl), Pred y y', Log10' xi y') => Log10' (xi :* xl) y
 -- type-level values denoting comparison results
 
 -- | Lower than 
-data CLT
+data LT
 -- | Equal
-data CEQ
+data EQ
 -- | Greater than
-data CGT
+data GT
 
--- | General comparison type-level assertion
-class (Nat x, Nat y) => Compare x y r | x y -> r
+-- | Trichotomy type-level relation. 'Trich x y r' establishes
+--   the relation (@r@) between @x@ and @y@. The obtained relation (@r@)
+--   Can be 'LT' (if @x@ is lower than @y@), 'EQ' (if @x@ equals @y@) or
+--   'GT' (if @x@ is greater than @y@)
+class (Nat x, Nat y) => Trich x y r | x y -> r
 
 -- | value-level reflection function for the comparison type-level assertion 
-cmp :: Compare x y r => z -> x -> r
-cmp = undefined
+trich :: Trich x y r => z -> x -> r
+trich = undefined
 
 -- by structural induction on the first, and then the second argument
 -- D0
-instance Compare D0 D0 CEQ
-instance Compare D0 D1 CLT
-instance Compare D0 D2 CLT
-instance Compare D0 D3 CLT
-instance Compare D0 D4 CLT
-instance Compare D0 D5 CLT
-instance Compare D0 D6 CLT
-instance Compare D0 D7 CLT
-instance Compare D0 D8 CLT
-instance Compare D0 D9 CLT
-instance Pos (yi :* yl) => Compare D0 (yi :* yl) CLT
-instance Pos (yi :* yl) => Compare (yi :* yl) D0 CGT
+instance Trich D0 D0 EQ
+instance Trich D0 D1 LT
+instance Trich D0 D2 LT
+instance Trich D0 D3 LT
+instance Trich D0 D4 LT
+instance Trich D0 D5 LT
+instance Trich D0 D6 LT
+instance Trich D0 D7 LT
+instance Trich D0 D8 LT
+instance Trich D0 D9 LT
+instance Pos (yi :* yl) => Trich D0 (yi :* yl) LT
+instance Pos (yi :* yl) => Trich (yi :* yl) D0 GT
 -- D1
-instance Compare D1 D0 CGT
-instance Compare D1 D1 CEQ
-instance Compare D1 D2 CLT
-instance Compare D1 D3 CLT 
-instance Compare D1 D4 CLT
-instance Compare D1 D5 CLT 
-instance Compare D1 D6 CLT
-instance Compare D1 D7 CLT 
-instance Compare D1 D8 CLT
-instance Compare D1 D9 CLT
-instance Pos (yi :* yl) => Compare D1 (yi :* yl) CLT
-instance Pos (yi :* yl) => Compare (yi :* yl) D1 CGT
+instance Trich D1 D0 GT
+instance Trich D1 D1 EQ
+instance Trich D1 D2 LT
+instance Trich D1 D3 LT 
+instance Trich D1 D4 LT
+instance Trich D1 D5 LT 
+instance Trich D1 D6 LT
+instance Trich D1 D7 LT 
+instance Trich D1 D8 LT
+instance Trich D1 D9 LT
+instance Pos (yi :* yl) => Trich D1 (yi :* yl) LT
+instance Pos (yi :* yl) => Trich (yi :* yl) D1 GT
 -- D2
-instance Compare D2 D0 CGT
-instance Compare D2 D1 CGT
-instance Compare D2 D2 CEQ
-instance Compare D2 D3 CLT
-instance Compare D2 D4 CLT
-instance Compare D2 D5 CLT
-instance Compare D2 D6 CLT
-instance Compare D2 D7 CLT
-instance Compare D2 D8 CLT
-instance Compare D2 D9 CLT
-instance Pos (yi :* yl) => Compare D2 (yi :* yl) CLT
-instance Pos (yi :* yl) => Compare (yi :* yl) D2 CGT
+instance Trich D2 D0 GT
+instance Trich D2 D1 GT
+instance Trich D2 D2 EQ
+instance Trich D2 D3 LT
+instance Trich D2 D4 LT
+instance Trich D2 D5 LT
+instance Trich D2 D6 LT
+instance Trich D2 D7 LT
+instance Trich D2 D8 LT
+instance Trich D2 D9 LT
+instance Pos (yi :* yl) => Trich D2 (yi :* yl) LT
+instance Pos (yi :* yl) => Trich (yi :* yl) D2 GT
 -- D3
-instance Compare D3 D0 CGT
-instance Compare D3 D1 CGT
-instance Compare D3 D2 CGT
-instance Compare D3 D3 CEQ
-instance Compare D3 D4 CLT
-instance Compare D3 D5 CLT
-instance Compare D3 D6 CLT
-instance Compare D3 D7 CLT
-instance Compare D3 D8 CLT
-instance Compare D3 D9 CLT
-instance Pos (yi :* yl) => Compare D3 (yi :* yl) CLT
-instance Pos (yi :* yl) => Compare (yi :* yl) D3 CGT
+instance Trich D3 D0 GT
+instance Trich D3 D1 GT
+instance Trich D3 D2 GT
+instance Trich D3 D3 EQ
+instance Trich D3 D4 LT
+instance Trich D3 D5 LT
+instance Trich D3 D6 LT
+instance Trich D3 D7 LT
+instance Trich D3 D8 LT
+instance Trich D3 D9 LT
+instance Pos (yi :* yl) => Trich D3 (yi :* yl) LT
+instance Pos (yi :* yl) => Trich (yi :* yl) D3 GT
 -- D4
-instance Compare D4 D0 CGT
-instance Compare D4 D1 CGT
-instance Compare D4 D2 CGT
-instance Compare D4 D3 CGT
-instance Compare D4 D4 CEQ
-instance Compare D4 D5 CLT
-instance Compare D4 D6 CLT
-instance Compare D4 D7 CLT
-instance Compare D4 D8 CLT
-instance Compare D4 D9 CLT
-instance Pos (yi :* yl) => Compare D4 (yi :* yl) CLT
-instance Pos (yi :* yl) => Compare (yi :* yl) D4 CGT
+instance Trich D4 D0 GT
+instance Trich D4 D1 GT
+instance Trich D4 D2 GT
+instance Trich D4 D3 GT
+instance Trich D4 D4 EQ
+instance Trich D4 D5 LT
+instance Trich D4 D6 LT
+instance Trich D4 D7 LT
+instance Trich D4 D8 LT
+instance Trich D4 D9 LT
+instance Pos (yi :* yl) => Trich D4 (yi :* yl) LT
+instance Pos (yi :* yl) => Trich (yi :* yl) D4 GT
 -- D5
-instance Compare D5 D0 CGT
-instance Compare D5 D1 CGT
-instance Compare D5 D2 CGT
-instance Compare D5 D3 CGT
-instance Compare D5 D4 CGT
-instance Compare D5 D5 CEQ
-instance Compare D5 D6 CLT
-instance Compare D5 D7 CLT
-instance Compare D5 D8 CLT
-instance Compare D5 D9 CLT
-instance Pos (yi :* yl) => Compare D5 (yi :* yl) CLT
-instance Pos (yi :* yl) => Compare (yi :* yl) D5 CGT
+instance Trich D5 D0 GT
+instance Trich D5 D1 GT
+instance Trich D5 D2 GT
+instance Trich D5 D3 GT
+instance Trich D5 D4 GT
+instance Trich D5 D5 EQ
+instance Trich D5 D6 LT
+instance Trich D5 D7 LT
+instance Trich D5 D8 LT
+instance Trich D5 D9 LT
+instance Pos (yi :* yl) => Trich D5 (yi :* yl) LT
+instance Pos (yi :* yl) => Trich (yi :* yl) D5 GT
 -- D6
-instance Compare D6 D0 CGT
-instance Compare D6 D1 CGT
-instance Compare D6 D2 CGT
-instance Compare D6 D3 CGT
-instance Compare D6 D4 CGT
-instance Compare D6 D5 CGT
-instance Compare D6 D6 CEQ
-instance Compare D6 D7 CLT
-instance Compare D6 D8 CLT
-instance Compare D6 D9 CLT
-instance Pos (yi :* yl) => Compare D6 (yi :* yl) CLT
-instance Pos (yi :* yl) => Compare (yi :* yl) D6 CGT
+instance Trich D6 D0 GT
+instance Trich D6 D1 GT
+instance Trich D6 D2 GT
+instance Trich D6 D3 GT
+instance Trich D6 D4 GT
+instance Trich D6 D5 GT
+instance Trich D6 D6 EQ
+instance Trich D6 D7 LT
+instance Trich D6 D8 LT
+instance Trich D6 D9 LT
+instance Pos (yi :* yl) => Trich D6 (yi :* yl) LT
+instance Pos (yi :* yl) => Trich (yi :* yl) D6 GT
 -- D7
-instance Compare D7 D0 CGT
-instance Compare D7 D1 CGT
-instance Compare D7 D2 CGT
-instance Compare D7 D3 CGT
-instance Compare D7 D4 CGT
-instance Compare D7 D5 CGT
-instance Compare D7 D6 CGT
-instance Compare D7 D7 CEQ
-instance Compare D7 D8 CLT
-instance Compare D7 D9 CLT
-instance Pos (yi :* yl) => Compare D7 (yi :* yl) CLT
-instance Pos (yi :* yl) => Compare (yi :* yl) D7 CGT
+instance Trich D7 D0 GT
+instance Trich D7 D1 GT
+instance Trich D7 D2 GT
+instance Trich D7 D3 GT
+instance Trich D7 D4 GT
+instance Trich D7 D5 GT
+instance Trich D7 D6 GT
+instance Trich D7 D7 EQ
+instance Trich D7 D8 LT
+instance Trich D7 D9 LT
+instance Pos (yi :* yl) => Trich D7 (yi :* yl) LT
+instance Pos (yi :* yl) => Trich (yi :* yl) D7 GT
 -- D8
-instance Compare D8 D0 CGT
-instance Compare D8 D1 CGT
-instance Compare D8 D2 CGT
-instance Compare D8 D3 CGT
-instance Compare D8 D4 CGT
-instance Compare D8 D5 CGT
-instance Compare D8 D6 CGT
-instance Compare D8 D7 CGT
-instance Compare D8 D8 CEQ
-instance Compare D8 D9 CLT
-instance Pos (yi :* yl) => Compare D8 (yi :* yl) CLT
-instance Pos (yi :* yl) => Compare (yi :* yl) D8 CGT
+instance Trich D8 D0 GT
+instance Trich D8 D1 GT
+instance Trich D8 D2 GT
+instance Trich D8 D3 GT
+instance Trich D8 D4 GT
+instance Trich D8 D5 GT
+instance Trich D8 D6 GT
+instance Trich D8 D7 GT
+instance Trich D8 D8 EQ
+instance Trich D8 D9 LT
+instance Pos (yi :* yl) => Trich D8 (yi :* yl) LT
+instance Pos (yi :* yl) => Trich (yi :* yl) D8 GT
 -- D9
-instance Compare D9 D0 CGT
-instance Compare D9 D1 CGT
-instance Compare D9 D2 CGT
-instance Compare D9 D3 CGT
-instance Compare D9 D4 CGT
-instance Compare D9 D5 CGT
-instance Compare D9 D6 CGT
-instance Compare D9 D7 CGT
-instance Compare D9 D8 CGT
-instance Compare D9 D9 CEQ
-instance Pos (yi :* yl) => Compare D9 (yi :* yl) CLT
-instance Pos (yi :* yl) => Compare (yi :* yl) D9 CGT
+instance Trich D9 D0 GT
+instance Trich D9 D1 GT
+instance Trich D9 D2 GT
+instance Trich D9 D3 GT
+instance Trich D9 D4 GT
+instance Trich D9 D5 GT
+instance Trich D9 D6 GT
+instance Trich D9 D7 GT
+instance Trich D9 D8 GT
+instance Trich D9 D9 EQ
+instance Pos (yi :* yl) => Trich D9 (yi :* yl) LT
+instance Pos (yi :* yl) => Trich (yi :* yl) D9 GT
 
 
 -- multidigit comparison
-instance (Pos (xi :* xl), Pos (yi :* yl), Compare xl yl rl, Compare xi yi ri,
-	  CS ri rl r) => Compare (xi :* xl) (yi :* yl) r
+instance (Pos (xi :* xl), Pos (yi :* yl), Trich xl yl rl, Trich xi yi ri,
+	  CS ri rl r) => Trich (xi :* xl) (yi :* yl) r
 
 -- strengthen the comparison relation
 class CS r1 r2 r3 | r1 r2 -> r3
-instance CS CEQ r r
-instance CS CGT r CGT
-instance CS CLT r CLT
+instance CS EQ r r
+instance CS GT r GT
+instance CS LT r LT
 
 -- Abbreviated comparison assertions
 
 -- | Equality abbreviated type-level assertion
 class x :==: y
-instance (Compare x y CEQ) => (:==:) x y -- ??? x :==: y fires an error 
+instance (Trich x y EQ) => (:==:) x y -- ??? x :==: y fires an error 
                                          -- with ghc 6.8.2 
 
 -- | value-level reflection function for the equality abbreviated 
 --   type-level assertion 
-(==) :: (x :==: y) => x -> y
+(==) :: (x :==: y) => x -> y -> ()
 (==) = undefined
 
 -- | Greater-than abbreviated type-level assertion
 class x :>: y
-instance (Compare x y CGT) => (:>:) x y 
+instance (Trich x y GT) => (:>:) x y 
 
 -- | value-level reflection function for the equality abbreviated 
 --   type-level assertion 
-(>) :: (x :>: y) => x -> y
+(>) :: (x :>: y) => x -> y -> ()
 (>) = undefined
 
 -- | Lower-than abbreviated type-level assertion
 class x :<: y
-instance (Compare x y CLT) => (:<:) x y 
+instance (Trich x y LT) => (:<:) x y 
 
 -- | value-level reflection function for the lower-than abbreviated 
 --   type-level assertion 
-(<) :: (x :<: y) => x -> y
+(<) :: (x :<: y) => x -> y -> ()
 (<) = undefined
 
 -- | Greater-than or equal abbreviated type-level assertion
 class x :>=: y
-instance (Succ x x', Compare x' y CGT) => (:>=:) x y 
+instance (Succ x x', Trich x' y GT) => (:>=:) x y 
 
 -- | value-level reflection function for the greater-than or equal abbreviated 
 --   type-level assertion 
-(>=) :: (x :>=: y) => x -> y
+(>=) :: (x :>=: y) => x -> y -> ()
 (>=) = undefined
 
 -- | Lower-than or equal abbreviated type-level assertion
 class x :<=: y
-instance (Succ x' x, Compare x' y CLT) => (:<=:) x y
+instance (Succ x' x, Trich x' y LT) => (:<=:) x y
 
 -- | value-level reflection function for the lower-than or equal abbreviated 
 --   type-level assertion 
-(<=) :: (x :<=: y) => x -> y
+(<=) :: (x :<=: y) => x -> y -> ()
 (<=) = undefined
 
 ------------------
@@ -728,13 +706,13 @@ instance (Succ x' x, Compare x' y CLT) => (:<=:) x y
 
 -- Choose the largest of x and y in the order b
 class Max' x y b r | x y b -> r
-instance Max' x y CLT y
-instance Max' x y CEQ y
-instance Max' x y CGT x
+instance Max' x y LT y
+instance Max' x y EQ y
+instance Max' x y GT x
 
 -- | Maximum type-level relation
 class Max x y z | x y -> z
-instance (Max' x y b z, Compare x y b) => Max x y z
+instance (Max' x y b z, Trich x y b) => Max x y z
 
 -- | value-level reflection function for the maximum type-level relation
 max :: Max x y z => x -> y -> z
@@ -742,7 +720,7 @@ max = undefined
 
 -- | Minimum type-level relation
 class Min x y z | x y -> z
-instance (Max' y x b z, Compare x y b) => Min x y z
+instance (Max' y x b z, Trich x y b) => Min x y z
 
 
 -- | value-level reflection function for the minimum type-level relation
@@ -755,15 +733,15 @@ min = undefined
 
 -- | Greatest Common Divisor type-level relation
 class (Nat x, Nat y, Nat gcd) => GCD x y gcd | x y -> gcd
-instance (Nat x, Nat y, Compare x y cmp, NClassify y cl, GCD' x y cl cmp gcd)
+instance (Nat x, Nat y, Trich x y cmp, IsZero y yz, GCD' x y yz cmp gcd)
    => GCD x y gcd
 
 -- Euclidean algorithm 
-class (Nat x, Nat y, Nat gcd) => GCD' x y cl cmp gcd | x y cmp cl -> gcd
-instance Nat x => GCD' x D0 Z cmp D0
-instance (Nat x, Nat y, GCD y x gcd) => GCD' x y P CLT gcd
-instance Nat x => GCD' x x  P CEQ x
-instance (Nat x, Nat y, Sub x y x', GCD x' y gcd) => GCD' x y P CGT gcd
+class (Nat x, Nat y, Nat gcd) => GCD' x y yz cmp gcd | x y yz cmp -> gcd
+instance Nat x => GCD' x D0 True cmp D0
+instance (Nat x, Nat y, GCD y x gcd) => GCD' x y False LT gcd
+instance Nat x => GCD' x x  False EQ x
+instance (Nat x, Nat y, Sub x y x', GCD x' y gcd) => GCD' x y False GT gcd
 
 -- | value-level reflection function for the GCD type-level relation
 gcd :: GCD x y z => x -> y -> z
@@ -774,17 +752,15 @@ gcd = undefined
 ---------------------
 
 -- classify a natural as positive or zero
-data Z
-data P
-class NClassify x r | x -> r
-instance NClassify D0 Z
-instance NClassify D1 P
-instance NClassify D2 P
-instance NClassify D3 P
-instance NClassify D4 P
-instance NClassify D5 P
-instance NClassify D6 P
-instance NClassify D7 P
-instance NClassify D8 P
-instance NClassify D9 P
-instance Pos x => NClassify (x :* d) P
+class IsZero x r | x -> r
+instance IsZero D0 True
+instance IsZero D1 False
+instance IsZero D2 False
+instance IsZero D3 False
+instance IsZero D4 False
+instance IsZero D5 False
+instance IsZero D6 False
+instance IsZero D7 False
+instance IsZero D8 False
+instance IsZero D9 False
+instance Pos x => IsZero (x :* d) False

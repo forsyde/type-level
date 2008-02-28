@@ -96,16 +96,18 @@ reifyBool False f = f false
 -- Operations
 -------------
 
--- Not type-level relation
+-- | Boolean negation type-level relation. @Not b1 b2@ establishes that
+-- @not b1 = b2@
 class (BoolI b1, BoolI b2) => Not b1 b2 | b1 -> b2, b2 -> b1
 instance Not False True
 instance Not True  False
 
--- | value-level reflection function for the Not type-level relation
+-- | value-level reflection function for the 'Not' type-level relation
 not :: Not b1 b2 => b1 -> b2
 not = undefined
 
--- And type-level relation
+-- | 'And' type-level relation. @And b1 b2 b3@ establishes that
+--   @b1 && b2 = b3@
 class (BoolI b1, BoolI b2, BoolI b3) => And b1 b2 b3 | b1 b2 -> b3
 instance And False False False  
 instance And False True  False  
@@ -113,12 +115,13 @@ instance And True  False False
 instance And True  True  True
 
 
--- | value-level reflection function for the And type-level relation
+-- | value-level reflection function for the 'And' type-level relation
 (&&) :: And b1 b2 b3 => b1 -> b2 -> b3
 (&&) = undefined
 
   
--- Or type-level relation
+-- | Or type-level relation. @Or b1 b2 b3@ establishes that
+--   @b1 || b2 = b3@
 class (BoolI b1, BoolI b2, BoolI b3) => Or b1 b2 b3 | b1 b2 -> b3
 instance Or False False False  
 instance Or False True  True  
@@ -126,23 +129,25 @@ instance Or True  False True
 instance Or True  True  True
 
 
--- | value-level reflection function for the Or type-level relation
+-- | value-level reflection function for the 'Or' type-level relation
 (||) :: Or b1 b2 b3 => b1 -> b2 -> b3
 (||) = undefined
 
--- Exclusive or type-level relation
+-- | Exclusive or type-level relation. @Xor b1 b2 b3@ establishes that
+--   @xor b1 b2 = b3@
 class (BoolI b1, BoolI b2, BoolI b3) => Xor b1 b2 b3 | b1 b2 -> b3
 instance Xor False False False  
 instance Xor False True  True  
 instance Xor True  False True  
 instance Xor True  True  False
 
--- | value-level reflection function for the Xor type-level relation
+-- | value-level reflection function for the 'Xor' type-level relation
 xor :: Xor b1 b2 b3 => b1 -> b2 -> b3
 xor = undefined
 
 
--- Implication type-level relation
+-- | Implication type-level relation. @Imp b1 b2 b3@ establishes that
+-- @b1 =>b2 = b3@
 class (BoolI b1, BoolI b2, BoolI b3) => Imp b1 b2 b3 | b1 b2 -> b3
 instance Imp False False True  
 instance Imp False True  True  
@@ -167,10 +172,10 @@ instance Eq True  True  True
 
 
 -- FIXME: eq should be named (==) but it clashes with the (==) defined
---        in Data.TypeLevel.Num . The chosen ugly solution was to rename it to
---        eq.
+--        in Data.TypeLevel.Num . The chosen (and ugly) workaround was 
+--        to rename it to eq.
 
--- | value-level reflection function for the Eq type-level relation
+-- | value-level reflection function for the 'Eq' type-level relation
 eq :: Eq b1 b2 b3 => b1 -> b2 -> b3
 eq = undefined
 
