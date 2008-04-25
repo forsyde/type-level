@@ -17,7 +17,7 @@
 ----------------------------------------------------------------------------
 module Data.TypeLevel.Bool (
     -- * Type-level boolean values
-    Bool,
+    Bool, toBool,
     False, false,
     True, true,
     reifyBool,
