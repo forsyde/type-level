@@ -38,7 +38,7 @@ tested-with:    GHC==6.8.2
 
 -- depends on ghc due to the use of infix type constructors and template haskell
 Library
-  build-depends:   base, ghc, template-haskell > 2.0
+  build-depends:   base, template-haskell > 2.0
   hs-source-dirs:  src
   exposed-modules: Data.TypeLevel,
                    Data.TypeLevel.Bool,
