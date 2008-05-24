@@ -191,6 +191,7 @@ instance Add x y z => Sub z y x
 -- | value-level reflection function for the 'Sub' type-level relation 
 (-) :: (Sub x y z) => x -> y -> z
 (-) = undefined
+infixl 6 +, -
 
 ------------------------------
 -- Multiplication and Division
@@ -234,7 +235,7 @@ instance (Pos (xi :* xl), Nat y, Mul xi y z, Mul10 z z10, Mul xl y dy,
 -- | value-level reflection function for the multiplication type-level relation 
 (*) :: Mul x y z => x -> y -> z
 (*) = undefined
-
+infixl 7 *
 
 -----------
 -- Division
@@ -276,6 +277,7 @@ instance DivMod x y q r => Mod x y r
 -- | value-level reflection function for the 'Mod' type-level relation 
 mod :: Mod x y r => x -> y -> r
 mod = undefined
+infixl 7 `div`, `mod`
 
 
 ----------------------------------------
@@ -376,7 +378,7 @@ instance (Nat b, Pos (ei :* el), Nat r,
 -- | value-level reflection function for the ExpBase type-level relation
 (^) :: ExpBase b e r => b -> e -> r
 (^) = undefined
-
+infixr 8 ^
 
 -- Logarithm type-level relation. @LogBase b x e@ establishes that 
 -- @log_base_b x = e@
@@ -699,7 +701,7 @@ instance (Succ x' x, Trich x' y LT) => (:<=:) x y
 --   type-level assertion 
 (<=) :: (x :<=: y) => x -> y -> ()
 (<=) = undefined
-
+infix 4 <,<=,>=,>,==
 ------------------
 -- Maximum/Minimum
 ------------------

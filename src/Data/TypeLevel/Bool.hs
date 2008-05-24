@@ -118,7 +118,7 @@ instance And True  True  True
 -- | value-level reflection function for the 'And' type-level relation
 (&&) :: And b1 b2 b3 => b1 -> b2 -> b3
 (&&) = undefined
-
+infixr 3 &&
   
 -- | Or type-level relation. @Or b1 b2 b3@ establishes that
 --   @b1 || b2 = b3@
@@ -132,6 +132,7 @@ instance Or True  True  True
 -- | value-level reflection function for the 'Or' type-level relation
 (||) :: Or b1 b2 b3 => b1 -> b2 -> b3
 (||) = undefined
+infixr 2 ||
 
 -- | Exclusive or type-level relation. @Xor b1 b2 b3@ establishes that
 --   @xor b1 b2 = b3@
@@ -144,7 +145,7 @@ instance Xor True  True  False
 -- | value-level reflection function for the 'Xor' type-level relation
 xor :: Xor b1 b2 b3 => b1 -> b2 -> b3
 xor = undefined
-
+infixl 6 `xor` -- infix declaration from Data.Bits
 
 -- | Implication type-level relation. @Imp b1 b2 b3@ establishes that
 -- @b1 =>b2 = b3@
