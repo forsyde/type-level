@@ -1,5 +1,5 @@
 name:           type-level
-version:        0.2
+version:        0.2.1
 cabal-version:  >= 1.2
 build-type:     Simple
 license:        BSD3
