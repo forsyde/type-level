@@ -1,5 +1,5 @@
 name:           type-level
-version:        0.2.1
+version:        0.2.2
 cabal-version:  >= 1.2
 build-type:     Simple
 license:        BSD3
@@ -32,6 +32,10 @@ description:
  type parameterized by the array's size or a modular group type Zn 
  parameterized by the modulus).
 
+ Here is a tutorial on type-level numerals and how to use them to
+ implement numerically-parameterized vectors: <http://www.ict.kth.se/org/ict/ecs/sam/projects/forsyde/www/files/tutorial/tutorial.html#FSVec>
+
+
 category:       Data
 tested-with:    GHC==6.8.2
 
@@ -48,4 +52,6 @@ Library
                    Data.TypeLevel.Num.Sets,
                    Data.TypeLevel.Num.Ops,
                    Data.TypeLevel.Num.Aliases.TH
-  ghc-options:	-Wall -O2
+  extra-source-files: LICENSE,
+                      README
+  ghc-options:	-Wall
