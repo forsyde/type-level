@@ -38,7 +38,8 @@ description:
 
 category:       Data
 tested-with:    GHC==6.8.2
-
+extra-source-files: LICENSE,
+                    README
 
 -- depends on ghc due to the use of infix type constructors and template haskell
 Library
@@ -52,6 +53,4 @@ Library
                    Data.TypeLevel.Num.Sets,
                    Data.TypeLevel.Num.Ops,
                    Data.TypeLevel.Num.Aliases.TH
-  extra-source-files: LICENSE,
-                      README
   ghc-options:	-Wall
