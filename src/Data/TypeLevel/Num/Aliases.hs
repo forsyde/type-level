@@ -20,10 +20,12 @@
 ----------------------------------------------------------------------------
 module Data.TypeLevel.Num.Aliases where
 
+import Language.Haskell.TH
 import Data.TypeLevel.Num.Reps
 import Data.TypeLevel.Num.Aliases.TH (genAliases)
 
 
-$(genAliases 1024 4096 5000 4096)
+$(do runIO (putStrLn "Generating and compiling a zillion numerical type aliases, this might take a while") 
+     genAliases 1024 4096 5000 4096)
 
 
