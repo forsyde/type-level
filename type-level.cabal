@@ -41,6 +41,9 @@ tested-with:    GHC==6.8.2
 extra-source-files: LICENSE,
                     README
 
+Flag base4
+    Description: Choose the even newer, even smaller, split-up base package.
+
 -- depends on ghc due to the use of infix type constructors and template haskell
 Library
   build-depends:   base, template-haskell > 2.0
@@ -54,3 +57,5 @@ Library
                    Data.TypeLevel.Num.Ops,
                    Data.TypeLevel.Num.Aliases.TH
   ghc-options:	-Wall
+  if flag(base4)
+    build-depends:   syb
