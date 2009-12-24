@@ -1,5 +1,5 @@
 {-# LANGUAGE TypeOperators, FlexibleInstances, FlexibleContexts,
-             UndecidableInstances, PatternSignatures, ScopedTypeVariables,
+             UndecidableInstances, ScopedTypeVariables,
              Rank2Types #-}
 {-# OPTIONS_GHC -fno-warn-incomplete-patterns -fno-warn-name-shadowing #-}
 -----------------------------------------------------------------------------

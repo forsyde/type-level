@@ -1,5 +1,5 @@
 name:           type-level
-version:        0.2.2
+version:        0.2.4
 cabal-version:  >= 1.2
 build-type:     Simple
 license:        BSD3
@@ -33,20 +33,17 @@ description:
  parameterized by the modulus).
 
  Here is a tutorial on type-level numerals and how to use them to
- implement numerically-parameterized vectors: <http://www.ict.kth.se/org/ict/ecs/sam/projects/forsyde/www/files/tutorial/tutorial.html#FSVec>
+ implement numerically-parameterized vectors: <http://www.ict.kth.se/forsyde/files/tutorial/tutorial.html#FSVec>
 
 
 category:       Data
-tested-with:    GHC==6.8.2
+tested-with:    GHC==6.10.4
 extra-source-files: LICENSE,
                     README
 
-Flag base4
-    Description: Choose the even newer, even smaller, split-up base package.
-
 -- depends on ghc due to the use of infix type constructors and template haskell
 Library
-  build-depends:   base, template-haskell > 2.0
+  build-depends:   base >=4 && <6, template-haskell > 2.0, syb
   hs-source-dirs:  src
   exposed-modules: Data.TypeLevel,
                    Data.TypeLevel.Bool,
@@ -57,5 +54,6 @@ Library
                    Data.TypeLevel.Num.Ops,
                    Data.TypeLevel.Num.Aliases.TH
   ghc-options:	-Wall
-  if flag(base4)
-    build-depends:   syb
+  if os(win32)
+    -- The symbols for the zillion type level numbers overflows the Windows DLL symbol space.
+    cpp-options: -DSLIM

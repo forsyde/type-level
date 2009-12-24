@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE CPP, TemplateHaskell #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.TypeLevel.Num.Aliases
@@ -26,6 +26,11 @@ import Data.TypeLevel.Num.Aliases.TH (genAliases)
 
 
 $(do runIO (putStrLn "Generating and compiling a zillion numerical type aliases, this might take a while") 
-     genAliases 1024 4096 5000 4096)
+#if defined(SLIM)
+     genAliases 16 64 256 64
+#else
+     genAliases 1024 4096 5000 4096
+#endif
+ )
 
 
