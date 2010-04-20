@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -fno-warn-missing-signatures #-}
+{-# OPTIONS_HADDOCK prune #-}
 {-# LANGUAGE CPP, TemplateHaskell #-}
 -----------------------------------------------------------------------------
 -- |
