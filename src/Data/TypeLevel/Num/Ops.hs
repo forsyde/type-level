@@ -88,6 +88,7 @@ class Failure t
 data PredecessorOfZeroError t
  
 instance Failure (PredecessorOfZeroError x) => Succ' (x,x) (x,x) D0 D0 True
+
 instance Succ' xi D0 xi D1 False
 instance Succ' xi D1 xi D2 False
 instance Succ' xi D2 xi D3 False
@@ -248,12 +249,13 @@ infixl 7 *
 class (Nat x, Pos y) =>  DivMod x y q r | x y -> q r
 instance (Pos y, Trich x y cmp, DivMod' x y q r cmp) => DivMod x y q r
 
-class (Nat x, Pos y) => DivMod' x y q r cmp | x y cmp -> q r, 
-                                              q r cmp y -> x,
-                                              q r cmp x -> y 
+-- FIXME: Is it required to introduce "q r x -> y" dependency as special case for q!=0?
+class (Nat x, Pos y) => DivMod' x y q r cmp | x y cmp -> q r,
+                                              q r y -> x
+
 instance (Nat x, Pos y) => DivMod' x y D0 x  LT
-instance (Nat x, Pos y) => DivMod' x y D1 D0 EQ
-instance (Nat x, Pos y, Sub x y x', Pred q q', DivMod x' y q' r) 
+instance (Pos x) => DivMod' x x D1 D0 EQ
+instance (Nat x, Pos y, Sub x y x', Sub q D1 q', Trich x' y cmp, DivMod' x' y q' r cmp)
   => DivMod' x y q r GT
 
 -- | value-level reflection function for the 'DivMod' type-level relation
