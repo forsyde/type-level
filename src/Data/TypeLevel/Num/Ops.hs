@@ -83,11 +83,11 @@ class Succ' xh xl yh yl yz | xh xl -> yh yl yz, yh yl yz -> xh xl
 -- trying to calculate the predecesor of 0
 -- FIXME: however, the instance rule is never triggered!
 
-class Failure t
--- No instances
-data PredecessorOfZeroError t
+--class Failure t
+---- No instances
+--data PredecessorOfZeroError t
  
-instance Failure (PredecessorOfZeroError x) => Succ' (x,x) (x,x) D0 D0 True
+--instance Failure (PredecessorOfZeroError x) => Succ' (x,x) (x,x) D0 D0 True
 
 instance Succ' xi D0 xi D1 False
 instance Succ' xi D1 xi D2 False
