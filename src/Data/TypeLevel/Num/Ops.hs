@@ -264,7 +264,7 @@ divMod _ _ = (undefined, undefined)
 
 -- | Division type-level relation. Remainder-discarding version of 'DivMod'. 
 --   Note it is not relational (due to DivMod not being relational)
-class Div x y z | x y -> z, x z -> y, y z -> x
+class Div x y z | x y -> z
 instance (DivMod x y q r) => Div x y q
 
 -- | value-level reflection function for the 'Div' type-level relation 
@@ -334,7 +334,7 @@ divMod10 _ = (undefined, undefined)
 
 
 -- | Division by 10 type-level relation (based on DivMod10)
-class (Nat x, Nat q) => Div10 x q | x -> q, q -> x
+class (Nat x, Nat q) => Div10 x q | x -> q
 instance DivMod10 x q r => Div10 x q
 
 -- | value-level reflection function for Mul10 
