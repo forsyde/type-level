@@ -1,6 +1,6 @@
 {-# LANGUAGE MultiParamTypeClasses, FunctionalDependencies, TypeOperators,
              FlexibleInstances, FlexibleContexts, UndecidableInstances,
-             EmptyDataDecls #-}
+             EmptyDataDecls, AllowAmbiguousTypes #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.TypeLevel.Num.Ops
