@@ -22,7 +22,6 @@
 module Data.TypeLevel.Num.Aliases where
 
 import Language.Haskell.TH
-import Data.TypeLevel.Num.Reps
 import Data.TypeLevel.Num.Aliases.TH (genAliases)
 
 

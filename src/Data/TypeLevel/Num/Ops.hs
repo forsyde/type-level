@@ -1,6 +1,6 @@
 {-# LANGUAGE MultiParamTypeClasses, FunctionalDependencies, TypeOperators,
              FlexibleInstances, FlexibleContexts, UndecidableInstances,
-             EmptyDataDecls #-}
+             EmptyDataDecls, AllowAmbiguousTypes #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.TypeLevel.Num.Ops
@@ -83,11 +83,12 @@ class Succ' xh xl yh yl yz | xh xl -> yh yl yz, yh yl yz -> xh xl
 -- trying to calculate the predecesor of 0
 -- FIXME: however, the instance rule is never triggered!
 
-class Failure t
--- No instances
-data PredecessorOfZeroError t
+--class Failure t
+---- No instances
+--data PredecessorOfZeroError t
  
-instance Failure (PredecessorOfZeroError x) => Succ' (x,x) (x,x) D0 D0 True
+--instance Failure (PredecessorOfZeroError x) => Succ' (x,x) (x,x) D0 D0 True
+
 instance Succ' xi D0 xi D1 False
 instance Succ' xi D1 xi D2 False
 instance Succ' xi D2 xi D3 False
@@ -248,12 +249,13 @@ infixl 7 *
 class (Nat x, Pos y) =>  DivMod x y q r | x y -> q r
 instance (Pos y, Trich x y cmp, DivMod' x y q r cmp) => DivMod x y q r
 
-class (Nat x, Pos y) => DivMod' x y q r cmp | x y cmp -> q r, 
-                                              q r cmp y -> x,
-                                              q r cmp x -> y 
+-- FIXME: Is it required to introduce "q r x -> y" dependency as special case for q!=0?
+class (Nat x, Pos y) => DivMod' x y q r cmp | x y cmp -> q r,
+                                              q r y -> x
+
 instance (Nat x, Pos y) => DivMod' x y D0 x  LT
-instance (Nat x, Pos y) => DivMod' x y D1 D0 EQ
-instance (Nat x, Pos y, Sub x y x', Pred q q', DivMod x' y q' r) 
+instance (Pos x) => DivMod' x x D1 D0 EQ
+instance (Nat x, Pos y, Sub x y x', Sub q D1 q', Trich x' y cmp, DivMod' x' y q' r cmp)
   => DivMod' x y q r GT
 
 -- | value-level reflection function for the 'DivMod' type-level relation
@@ -262,7 +264,7 @@ divMod _ _ = (undefined, undefined)
 
 -- | Division type-level relation. Remainder-discarding version of 'DivMod'. 
 --   Note it is not relational (due to DivMod not being relational)
-class Div x y z | x y -> z, x z -> y, y z -> x
+class Div x y z | x y -> z
 instance (DivMod x y q r) => Div x y q
 
 -- | value-level reflection function for the 'Div' type-level relation 
@@ -332,7 +334,7 @@ divMod10 _ = (undefined, undefined)
 
 
 -- | Division by 10 type-level relation (based on DivMod10)
-class (Nat x, Nat q) => Div10 x q | x -> q, q -> x
+class (Nat x, Nat q) => Div10 x q | x -> q
 instance DivMod10 x q r => Div10 x q
 
 -- | value-level reflection function for Mul10 
