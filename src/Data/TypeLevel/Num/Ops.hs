@@ -385,8 +385,8 @@ infixr 8 ^
 -- Logarithm type-level relation. @LogBase b x e@ establishes that 
 -- @log_base_b x = e@
 --  Note it is not relational (i.e. cannot be used to express exponentiation)
-class (Pos b, b :>=: D2, PosI x, Pos x, Nat e) =>  LogBase b x e  | b x -> e 
-instance  LogBaseF b x e f => LogBase b x e
+class (Pos b, b :>=: D2, Pos x, Nat e) =>  LogBase b x e  | b x -> e 
+instance  (Pos b, b :>=: D2, Pos x, Nat e, LogBaseF b x e f) => LogBase b x e
 
 
 -- | value-level reflection function for LogBase
@@ -398,9 +398,9 @@ logBase = undefined
 -- calculated was exact.
 -- f indicates if the resulting logarithm has no fractional part (i.e.
 -- tells if the result provided is exact)
-class (Pos b, b :>=: D2, PosI x, Pos x, Nat e, Bool f) 
+class (Pos b, b :>=: D2, Pos x, Nat e, Bool f) 
      =>  LogBaseF b x e f | b x -> e f
-instance (Trich x b cmp, LogBaseF' b x e f cmp) => LogBaseF b x e f
+instance (Pos b, b :>=: D2, Pos x, Nat e, Bool f, Trich x b cmp, LogBaseF' b x e f cmp) => LogBaseF b x e f
 
 class (Pos b, b :>=: D2, Pos x, Nat e, Bool f)
      => LogBaseF' b x e f cmp | b x cmp -> e f 
@@ -424,8 +424,8 @@ logBaseF _ _ = (undefined, undefined)
 -- | Assert that a number (@x@) can be expressed as the power of another one
 --   (@b@) (i.e. the fractional part of @log_base_b x = 0@, or, 
 --   in a different way, @exists y . b\^y = x@). 
-class (Pos b, b :>=: D2, PosI x, Pos x) =>  IsPowOf b x
-instance (Trich x b cmp, IsPowOf' b x cmp) => IsPowOf b x
+class (Pos b, b :>=: D2, Pos x) =>  IsPowOf b x
+instance (Pos b, b :>=: D2, Pos x, Trich x b cmp, IsPowOf' b x cmp) => IsPowOf b x
 
 class (Pos b, b :>=: D2, Pos x) => IsPowOf' b x cmp
 -- If lower (x < b), then the logarithm is not exact  

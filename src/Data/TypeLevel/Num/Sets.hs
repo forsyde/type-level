@@ -17,7 +17,7 @@
 -- Positives.
 -- 
 ----------------------------------------------------------------------------
-module Data.TypeLevel.Num.Sets (Pos, PosI, Nat, toNum, toInt, reifyIntegral) where 
+module Data.TypeLevel.Num.Sets (Pos, Nat, toNum, toInt, reifyIntegral) where 
 
 import Data.TypeLevel.Num.Reps
 
