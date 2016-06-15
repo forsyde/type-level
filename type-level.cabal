@@ -1,6 +1,6 @@
 name:           type-level
 version:        0.3.0
-cabal-version:  >= 1.2
+cabal-version:  >= 1.6
 build-type:     Simple
 license:        BSD3
 license-file:   LICENSE
@@ -35,7 +35,6 @@ description:
  Here is a tutorial on type-level numerals and how to use them to
  implement numerically-parameterized vectors: <http://www.ict.kth.se/forsyde/files/tutorial/tutorial.html#FSVec>
 
-cabal-version:  >= 1.6
 category:       Data
 tested-with:    GHC==7.10.1
 extra-source-files: LICENSE,
@@ -60,4 +59,4 @@ Library
 
 source-repository head
   type:     git
-  location: https://github.com/forsyde/type-level
+  location: https://github.com/forsyde/type-level.git
