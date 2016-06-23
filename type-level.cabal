@@ -52,7 +52,7 @@ Library
                    Data.TypeLevel.Num.Sets,
                    Data.TypeLevel.Num.Ops,
                    Data.TypeLevel.Num.Aliases.TH
-  ghc-options:	-Wall
+  ghc-options:	-Wall -Wno-redundant-constraints
   if os(win32)
     -- The symbols for the zillion type level numbers overflows the Windows DLL symbol space.
     cpp-options: -DSLIM
