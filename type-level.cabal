@@ -33,7 +33,7 @@ description:
  parameterized by the modulus).
 
  Here is a tutorial on type-level numerals and how to use them to
- implement numerically-parameterized vectors: <http://www.ict.kth.se/forsyde/files/tutorial/tutorial.html#FSVec>
+ implement numerically-parameterized vectors: <https://forsyde.ict.kth.se/trac/wiki/ForSyDe/Haskell/ForSyDeTutorial#FSVec>
 
 category:       Data
 tested-with:    GHC==7.10.1
