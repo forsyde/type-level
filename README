@@ -9,7 +9,7 @@ DESCRIPTION
 
  To date, Booleans and Numerals (Naturals and Positives) are
  supported. With regard to Numerals, there is support for common
- arithmetic operations (addition, substraction, multiplication,
+ arithmetic operations (addition, subtraction, multiplication,
  division, exponientation, logarithm, maximum, comparison, GCD) 
  over natural numbers (using a decimal representation to make 
  compile-time errors friendlier).
